@@ -10,9 +10,6 @@ const nextConfig = {
     unoptimized: true,
     domains: [],
   },
-  // 정적 사이트 생성을 위한 설정
-  output: 'export',
-  trailingSlash: true,
   // 빌드 최적화
   swcMinify: true,
   // 환경 변수 설정
