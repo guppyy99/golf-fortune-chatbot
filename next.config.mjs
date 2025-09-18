@@ -7,7 +7,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
     domains: [],
   },
   // 빌드 최적화

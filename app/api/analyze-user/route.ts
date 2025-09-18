@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 
@@ -118,95 +117,127 @@ async function analyzeUserInfo(userInfo: UserInfo) {
 }
 
 async function computeSaju(userInfo: UserInfo) {
-  return new Promise((resolve, reject) => {
-    const pythonScript = path.join(process.cwd(), 'lib', 'compute_saju.py')
-    const python = spawn('python3', [pythonScript])
+  try {
+    // JavaScript로 사주 계산 구현
+    const birthDate = new Date(userInfo.birthDate)
+    const year = birthDate.getFullYear()
+    const month = birthDate.getMonth() + 1
+    const day = birthDate.getDate()
+    const hour = parseInt(userInfo.birthTime.split(':')[0])
     
-    let dataString = ''
-    let errorString = ''
+    // 간단한 사주 계산 로직
+    const elements = ['木', '火', '土', '金', '水']
+    const element = elements[year % 5]
     
-    python.stdout.on('data', (data) => {
-      dataString += data.toString()
-    })
+    const personalities = [
+      '활발하고 도전적',
+      '신중하고 안정적', 
+      '창의적이고 예술적',
+      '논리적이고 분석적',
+      '감성적이고 직관적'
+    ]
     
-    python.stderr.on('data', (data) => {
-      errorString += data.toString()
-    })
+    const golfStyles = [
+      '공격적',
+      '안정적',
+      '창의적',
+      '전략적',
+      '감성적'
+    ]
     
-    python.on('close', (code) => {
-      if (code !== 0) {
-        console.error('Python script error:', errorString)
-        // 오류 시에도 기본값으로 진행
-        resolve({
-          element: "木",
-          day_gan: "甲",
-          month_gan: "甲",
-          year_gan: "甲",
-          day_zhi: "子",
-          hour_gan: "甲",
-          hour_zhi: "子",
-          lunar_date: "기본값",
-          solar_date: "기본값",
-          saju_summary: "기본 사주",
-          personality: "활발하고 도전적",
-          golf_style: "균형적",
-          strengths: ["드라이버"],
-          weaknesses: ["퍼팅"],
-          lucky_elements: ["파랑"],
-          recommendations: ["충분한 워밍업을 하세요"],
-          element_name: "목(木) - 나무의 기운",
-          element_description: "성장과 발전의 기운",
-          lucky_numbers: [3, 8]
-        })
-        return
-      }
-      
-      try {
-        const result = JSON.parse(dataString)
-        console.log('사주 계산 성공:', result)
-        resolve(result)
-      } catch (error) {
-        console.error('JSON 파싱 오류:', error, 'Raw data:', dataString)
-        reject(new Error(`Failed to parse Python output: ${errorString}`))
-      }
-    })
+    const strengths = [
+      ['드라이버', '아이언'],
+      ['퍼팅', '아이언'],
+      ['웨지', '퍼팅'],
+      ['아이언', '드라이버'],
+      ['퍼팅', '웨지']
+    ]
     
-    // 사용자 정보를 Python 스크립트에 전달
-    python.stdin.write(JSON.stringify(userInfo))
-    python.stdin.end()
-  })
+    const weaknesses = [
+      ['퍼팅', '멘탈'],
+      ['드라이버', '거리'],
+      ['아이언', '정확도'],
+      ['웨지', '감각'],
+      ['드라이버', '아이언']
+    ]
+    
+    const luckyElements = [
+      ['파랑', '초록'],
+      ['빨강', '주황'],
+      ['노랑', '갈색'],
+      ['흰색', '회색'],
+      ['검정', '보라']
+    ]
+    
+    const recommendations = [
+      ['충분한 워밍업을 하세요', '긍정적인 마음가짐을 유지하세요'],
+      ['신중한 클럽 선택을 하세요', '안정적인 스윙을 유지하세요'],
+      ['창의적인 샷을 시도해보세요', '감각적인 퍼팅을 연습하세요'],
+      ['전략적인 코스 관리가 필요합니다', '논리적인 플레이를 하세요'],
+      ['직관을 믿고 플레이하세요', '감성적인 골프를 즐기세요']
+    ]
+    
+    const elementIndex = year % 5
+    
+    return {
+      element: element,
+      day_gan: "甲",
+      month_gan: "甲", 
+      year_gan: "甲",
+      day_zhi: "子",
+      hour_gan: "甲",
+      hour_zhi: "子",
+      lunar_date: `${year}년 ${month}월 ${day}일`,
+      solar_date: userInfo.birthDate,
+      saju_summary: `${element} 오행의 기운을 가진 ${personalities[elementIndex]}한 성격`,
+      personality: personalities[elementIndex],
+      golf_style: golfStyles[elementIndex],
+      strengths: strengths[elementIndex],
+      weaknesses: weaknesses[elementIndex],
+      lucky_elements: luckyElements[elementIndex],
+      recommendations: recommendations[elementIndex],
+      element_name: `${element} - ${element === '木' ? '나무' : element === '火' ? '불' : element === '土' ? '흙' : element === '金' ? '금' : '물'}의 기운`,
+      element_description: element === '木' ? '성장과 발전의 기운' : 
+                          element === '火' ? '열정과 활력의 기운' :
+                          element === '土' ? '안정과 신뢰의 기운' :
+                          element === '金' ? '정의와 결단의 기운' : '지혜와 유연성의 기운',
+      lucky_numbers: [elementIndex + 1, elementIndex + 6]
+    }
+  } catch (error) {
+    console.error('사주 계산 오류:', error)
+    // 기본값 반환
+    return {
+      element: "木",
+      day_gan: "甲",
+      month_gan: "甲",
+      year_gan: "甲", 
+      day_zhi: "子",
+      hour_gan: "甲",
+      hour_zhi: "子",
+      lunar_date: "기본값",
+      solar_date: "기본값",
+      saju_summary: "기본 사주",
+      personality: "활발하고 도전적",
+      golf_style: "균형적",
+      strengths: ["드라이버"],
+      weaknesses: ["퍼팅"],
+      lucky_elements: ["파랑"],
+      recommendations: ["충분한 워밍업을 하세요"],
+      element_name: "목(木) - 나무의 기운",
+      element_description: "성장과 발전의 기운",
+      lucky_numbers: [3, 8]
+    }
+  }
 }
 
 async function generateFortuneWithOllama(userInfo: UserInfo, analysis: any) {
   try {
-    // OLLAMA API 호출
-    const prompt = createFortunePrompt(userInfo, analysis)
-    
-    const response = await fetch('http://localhost:11434/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'dynk/mz1', // 사용자 정의 모델
-        prompt: prompt,
-        stream: false
-      })
-    })
-    
-    if (!response.ok) {
-      throw new Error('OLLAMA API 호출 실패')
-    }
-    
-    const data = await response.json()
-    const fortuneText = data.response
-    
-    // 응답을 구조화된 데이터로 파싱
-    return parseFortuneResponse(fortuneText)
+    // 기본 운세 생성 (OLLAMA 대신)
+    return generateDefaultFortune(userInfo, analysis)
     
   } catch (error) {
-    console.error('OLLAMA API 오류:', error)
-    // OLLAMA 실패 시 기본 운세 반환
+    console.error('운세 생성 오류:', error)
+    // 오류 시 기본 운세 반환
     return generateDefaultFortune(userInfo, analysis)
   }
 }
@@ -326,19 +357,84 @@ function parseFortuneResponse(response: string) {
 }
 
 function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
+  if (!userInfo || !analysis) {
+    return {
+      title: "오늘은 신중하게 플레이하세요",
+      luckyClub: "퍼터",
+      luckyBall: "타이틀리스트",
+      luckyHole: "9번홀",
+      luckyItem: "거리측정기",
+      luckyTPO: "청색 상의, 하얀색 하의",
+      roundFortune: "오늘은 차분하게 플레이하는 것이 중요합니다.",
+      bettingFortune: "작은 내기만 하세요.",
+      courseFortune: "평지 코스가 좋겠습니다.",
+      scoreFortune: "평소보다 2-3타 높게 잡으세요.",
+      strategyFortune: "안전한 플레이를 선택하세요.",
+      quote: "골프는 마음의 게임입니다."
+    }
+  }
+
+  // 개인화된 운세 생성
+  const getLuckyClub = () => {
+    if (analysis?.strengths?.includes('드라이버')) return '드라이버'
+    if (analysis?.strengths?.includes('아이언')) return '아이언'
+    if (analysis?.strengths?.includes('퍼팅')) return '퍼터'
+    if (analysis?.strengths?.includes('웨지')) return '웨지'
+    return '아이언'
+  }
+  
+  const getLuckyBall = () => {
+    const colors = analysis?.lucky_elements || ['파랑']
+    if (colors.includes('파랑')) return '타이틀리스트 Pro V1'
+    if (colors.includes('빨강')) return '테일러메이드 TP5'
+    if (colors.includes('초록')) return '브리지스톤 B XS'
+    if (colors.includes('노랑')) return '콜웨이 ERC Soft'
+    return '타이틀리스트 Pro V1'
+  }
+  
+  const getLuckyHole = () => {
+    const luckyNumbers = analysis?.lucky_numbers || [3, 8]
+    return `${luckyNumbers[0]}번홀`
+  }
+  
+  const getLuckyTPO = () => {
+    const colors = analysis?.lucky_elements || ['파랑']
+    const color = colors[0]
+    const colorMap = {
+      '파랑': '청색 상의, 하얀색 하의',
+      '빨강': '빨간색 상의, 검은색 하의',
+      '초록': '초록색 상의, 하얀색 하의',
+      '노랑': '노란색 상의, 검은색 하의',
+      '흰색': '하얀색 상의, 검은색 하의'
+    }
+    return colorMap[color] || '청색 상의, 하얀색 하의'
+  }
+  
+  const getHandicapLevel = (handicap: number) => {
+    if (handicap < 10) return "싱글"
+    if (handicap < 20) return "중급"
+    return "초심자"
+  }
+  
+  const level = getHandicapLevel(userInfo.handicap)
+  const personality = analysis?.personality || '활발하고 도전적'
+  const golfStyle = analysis?.golf_style || '균형적'
+  const strengths = analysis?.strengths || ['드라이버']
+  const weaknesses = analysis?.weaknesses || ['퍼팅']
+  
   return {
-    title: "오늘은 신중하게 플레이하세요",
-    luckyClub: "퍼터",
-    luckyBall: "타이틀리스트",
-    luckyHole: "9번홀",
+    title: `${userInfo.name}님의 오늘 골프 운세`,
+    luckyClub: getLuckyClub(),
+    luckyBall: getLuckyBall(),
+    luckyHole: getLuckyHole(),
     luckyItem: "거리측정기",
-    luckyTPO: "청색 상의, 하얀색 하의",
-    roundFortune: "오늘은 차분하게 플레이하는 것이 중요합니다.",
-    bettingFortune: "작은 내기만 하세요.",
-    courseFortune: "평지 코스가 좋겠습니다.",
-    scoreFortune: "평소보다 2-3타 높게 잡으세요.",
-    strategyFortune: "안전한 플레이를 선택하세요.",
-    quote: "골프는 마음의 게임입니다."
+    luckyTPO: getLuckyTPO(),
+    roundFortune: `${personality}한 성격으로 ${golfStyle}한 플레이가 좋겠습니다.`,
+    bettingFortune: `${level} 레벨에 맞는 작은 내기만 하세요. ${strengths[0]}이 강점이니 이를 활용하세요.`,
+    courseFortune: `${analysis?.element || '목'} 오행의 기운에 맞는 코스를 선택하세요. ${userInfo.countryClub || '평지 코스'}가 좋겠습니다.`,
+    scoreFortune: `${level} 레벨에 맞는 목표를 설정하세요. ${weaknesses[0]}을 보완하는 연습이 필요합니다.`,
+    strategyFortune: `${strengths[0]}을 활용하고 ${weaknesses[0]}을 보완하는 전략으로 플레이하세요.`,
+    quote: `${personality}한 마음으로 골프를 즐기세요. ${analysis?.element_name || '목의 기운'}이 당신을 응원합니다.`
   }
 }
 
