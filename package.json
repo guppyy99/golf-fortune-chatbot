@@ -9,7 +9,8 @@
     "start": "next start",
     "start:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\start-dev.ps1",
     "start:dev:3001": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\start-dev.ps1 -Port 3001",
-    "stop:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\stop-dev.ps1"
+    "stop:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\stop-dev.ps1",
+    "generate-fortunes": "node scripts/generate-fortunes.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
