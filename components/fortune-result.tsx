@@ -4,6 +4,172 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { UserInfo, FortuneAnalysis } from "./golf-fortune-app"
 
+// 운세 텍스트를 섹션별로 파싱하는 함수
+function parseFortuneSections(fortuneText: string) {
+  if (!fortuneText) return null
+
+  const sections = []
+  const lines = fortuneText.split('\n')
+  
+  let currentSection = null
+  let currentContent = []
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim()
+    
+    // 섹션 헤더 감지
+    if (trimmedLine.includes('전반 기류') || trimmedLine.includes('세부 운세') || 
+        trimmedLine.includes('멘탈 운') || trimmedLine.includes('기술 운') || 
+        trimmedLine.includes('체력 운') || trimmedLine.includes('인맥 운') || 
+        trimmedLine.includes('종합') || trimmedLine.includes('허허')) {
+      
+      // 이전 섹션 저장
+      if (currentSection && currentContent.length > 0) {
+        sections.push({
+          type: currentSection,
+          content: currentContent.join('\n').trim()
+        })
+      }
+      
+      // 새 섹션 시작
+      if (trimmedLine.includes('전반 기류')) {
+        currentSection = 'overall'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('세부 운세')) {
+        currentSection = 'details'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('멘탈 운')) {
+        currentSection = 'mental'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('기술 운')) {
+        currentSection = 'skill'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('체력 운')) {
+        currentSection = 'physical'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('인맥 운')) {
+        currentSection = 'network'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('종합')) {
+        currentSection = 'summary'
+        currentContent = [trimmedLine]
+      } else if (trimmedLine.includes('허허')) {
+        currentSection = 'final'
+        currentContent = [trimmedLine]
+      }
+    } else if (trimmedLine && currentSection) {
+      currentContent.push(trimmedLine)
+    }
+  }
+  
+  // 마지막 섹션 저장
+  if (currentSection && currentContent.length > 0) {
+    sections.push({
+      type: currentSection,
+      content: currentContent.join('\n').trim()
+    })
+  }
+  
+  return sections.map((section, index) => {
+    const sectionConfig = getSectionConfig(section.type)
+    return (
+      <div key={index} className={`p-6 rounded-xl border ${sectionConfig.bg} ${sectionConfig.border}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${sectionConfig.iconBg}`}>
+            <span className="text-white text-sm">{sectionConfig.icon}</span>
+          </div>
+          <h3 className={`text-lg font-bold ${sectionConfig.titleColor}`}>
+            {sectionConfig.title}
+          </h3>
+        </div>
+        <div className={`text-sm leading-relaxed ${sectionConfig.textColor}`}>
+          {section.content}
+        </div>
+      </div>
+    )
+  })
+}
+
+// 섹션별 설정
+function getSectionConfig(type: string) {
+  const configs = {
+    overall: {
+      title: '전반 기류',
+      icon: '🌊',
+      iconBg: 'bg-gradient-to-br from-blue-400 to-cyan-400',
+      bg: 'bg-gradient-to-r from-blue-50 to-cyan-50',
+      border: 'border-blue-100',
+      titleColor: 'text-blue-800',
+      textColor: 'text-blue-700'
+    },
+    details: {
+      title: '세부 운세',
+      icon: '🔍',
+      iconBg: 'bg-gradient-to-br from-purple-400 to-pink-400',
+      bg: 'bg-gradient-to-r from-purple-50 to-pink-50',
+      border: 'border-purple-100',
+      titleColor: 'text-purple-800',
+      textColor: 'text-purple-700'
+    },
+    mental: {
+      title: '멘탈 운',
+      icon: '🧠',
+      iconBg: 'bg-gradient-to-br from-emerald-400 to-teal-400',
+      bg: 'bg-gradient-to-r from-emerald-50 to-teal-50',
+      border: 'border-emerald-100',
+      titleColor: 'text-emerald-800',
+      textColor: 'text-emerald-700'
+    },
+    skill: {
+      title: '기술 운',
+      icon: '⚡',
+      iconBg: 'bg-gradient-to-br from-amber-400 to-orange-400',
+      bg: 'bg-gradient-to-r from-amber-50 to-orange-50',
+      border: 'border-amber-100',
+      titleColor: 'text-amber-800',
+      textColor: 'text-amber-700'
+    },
+    physical: {
+      title: '체력 운',
+      icon: '💪',
+      iconBg: 'bg-gradient-to-br from-red-400 to-pink-400',
+      bg: 'bg-gradient-to-r from-red-50 to-pink-50',
+      border: 'border-red-100',
+      titleColor: 'text-red-800',
+      textColor: 'text-red-700'
+    },
+    network: {
+      title: '인맥 운',
+      icon: '🤝',
+      iconBg: 'bg-gradient-to-br from-indigo-400 to-purple-400',
+      bg: 'bg-gradient-to-r from-indigo-50 to-purple-50',
+      border: 'border-indigo-100',
+      titleColor: 'text-indigo-800',
+      textColor: 'text-indigo-700'
+    },
+    summary: {
+      title: '종합 메시지',
+      icon: '🎯',
+      iconBg: 'bg-gradient-to-br from-yellow-400 to-orange-400',
+      bg: 'bg-gradient-to-r from-yellow-50 to-orange-50',
+      border: 'border-yellow-100',
+      titleColor: 'text-yellow-800',
+      textColor: 'text-yellow-700'
+    },
+    final: {
+      title: '마무리 조언',
+      icon: '✨',
+      iconBg: 'bg-gradient-to-br from-gray-400 to-gray-600',
+      bg: 'bg-gradient-to-r from-gray-50 to-gray-100',
+      border: 'border-gray-200',
+      titleColor: 'text-gray-800',
+      textColor: 'text-gray-700'
+    }
+  }
+  
+  return configs[type] || configs.final
+}
+
 interface FortuneResultProps {
   userInfo: UserInfo
   fortuneData: FortuneAnalysis
@@ -25,7 +191,7 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
         </CardHeader>
 
         <CardContent>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100">
               <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-400 rounded-lg flex items-center justify-center">
                 <span className="text-white text-lg">🏌️</span>
@@ -33,16 +199,6 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
               <div className="flex-1">
                 <div className="text-sm text-gray-500">행운의 클럽</div>
                 <div className="font-semibold text-gray-800">{fortuneData.fortune?.luckyClub}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg">⚪</span>
-              </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500">행운의 볼</div>
-                <div className="font-semibold text-gray-800">{fortuneData.fortune?.luckyBall}</div>
               </div>
             </div>
 
@@ -65,22 +221,12 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
                 <div className="font-semibold text-gray-800">{fortuneData.fortune?.luckyItem}</div>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-100">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-400 rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg">👕</span>
-              </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500">행운의 TPO</div>
-                <div className="font-semibold text-gray-800">{fortuneData.fortune?.luckyTPO}</div>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
 
 
-            {/* 골신 할아버지 운세 */}
+            {/* 골신 할아버지 운세 - 동적 파싱 */}
             <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
               <CardContent className="p-8">
                 <div className="text-center mb-8">
@@ -91,8 +237,8 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
                   <p className="text-gray-600">100년 넘게 골프를 지켜본 신선의 지혜</p>
                 </div>
                 
-                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {fortuneData.fortune?.title || '골신 할아버지가 운세를 준비하고 있습니다...'}
+                <div className="space-y-6">
+                  {parseFortuneSections(fortuneData.fortune?.title || '')}
                 </div>
               </CardContent>
             </Card>

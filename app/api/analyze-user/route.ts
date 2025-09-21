@@ -359,18 +359,14 @@ function parseFortuneResponse(response: string, userInfo: UserInfo, analysis: an
     
     // 동적 행운 아이템 생성 (핸디캡 정보 포함)
     const luckyClub = analysis?.lucky_club || getLuckyClubFromStrengths(analysis?.strengths, userInfo.handicap)
-    const luckyBall = analysis?.lucky_ball || getLuckyBallFromColors(analysis?.lucky_elements)
-    const luckyTPO = analysis?.lucky_tpo || getLuckyTPOFromColors(analysis?.lucky_elements)
     const luckyHole = getLuckyHoleFromNumbers(analysis?.lucky_numbers)
     const luckyItem = getLuckyItemFromElement(analysis?.element)
     
     return {
       title: response, // 전체 골신 할아버지 응답을 title로 사용
       luckyClub: luckyClub,
-      luckyBall: luckyBall,
       luckyHole: luckyHole,
       luckyItem: luckyItem,
-      luckyTPO: luckyTPO,
       roundFortune: generalMatch ? generalMatch[1].trim() : "올해는 기초를 다지는 해가 될 것 같네요.",
       bettingFortune: mentalMatch ? mentalMatch[1].trim() : "멘탈이 절반이라네. 긍정적인 마음가짐을 유지하세요.",
       strategyFortune: skillMatch ? skillMatch[1].trim() : "기술적 측면에서 꾸준한 연습이 필요하겠네요.",
@@ -451,33 +447,6 @@ function getLuckyClubFromStrengths(strengths: string[], handicap: number) {
          'Srixon ZXi7'
 }
 
-function getLuckyBallFromColors(colors: string[]) {
-  if (!Array.isArray(colors)) return '타이틀리스트 Pro V1'
-  const color = colors[0] || '파랑'
-  const ballMap = {
-    '파랑': '타이틀리스트 Pro V1',
-    '빨강': '테일러메이드 TP5',
-    '초록': '브리지스톤 B XS',
-    '노랑': '콜웨이 ERC Soft',
-    '검정': '윌슨 Staff Model',
-    '흰색': '스릭슨 Z-STAR'
-  }
-  return ballMap[color] || '타이틀리스트 Pro V1'
-}
-
-function getLuckyTPOFromColors(colors: string[]) {
-  if (!Array.isArray(colors)) return '청색 상의, 하얀색 하의'
-  const color = colors[0] || '파랑'
-  const tpoMap = {
-    '파랑': '청색 상의, 하얀색 하의',
-    '빨강': '빨간색 상의, 검은색 하의',
-    '초록': '초록색 상의, 하얀색 하의',
-    '노랑': '노란색 상의, 검은색 하의',
-    '검정': '검은색 상의, 하얀색 하의',
-    '흰색': '하얀색 상의, 검은색 하의'
-  }
-  return tpoMap[color] || '청색 상의, 하얀색 하의'
-}
 
 function getLuckyHoleFromNumbers(numbers: number[]) {
   if (!Array.isArray(numbers) || numbers.length === 0) return '5번홀'
@@ -518,31 +487,9 @@ function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
     return getLuckyClubFromStrengths(analysis?.strengths, userInfo.handicap)
   }
   
-  const getLuckyBall = () => {
-    const colors = analysis?.lucky_elements || ['파랑']
-    if (colors.includes('파랑')) return '타이틀리스트 Pro V1'
-    if (colors.includes('빨강')) return '테일러메이드 TP5'
-    if (colors.includes('초록')) return '브리지스톤 B XS'
-    if (colors.includes('노랑')) return '콜웨이 ERC Soft'
-    return '타이틀리스트 Pro V1'
-  }
-  
   const getLuckyHole = () => {
     const luckyNumbers = analysis?.lucky_numbers || [3, 8]
     return `${luckyNumbers[0]}번홀`
-  }
-  
-  const getLuckyTPO = () => {
-    const colors = analysis?.lucky_elements || ['파랑']
-    const color = colors[0]
-    const colorMap = {
-      '파랑': '청색 상의, 하얀색 하의',
-      '빨강': '빨간색 상의, 검은색 하의',
-      '초록': '초록색 상의, 하얀색 하의',
-      '노랑': '노란색 상의, 검은색 하의',
-      '흰색': '하얀색 상의, 검은색 하의'
-    }
-    return colorMap[color] || '청색 상의, 하얀색 하의'
   }
   
   const getHandicapLevel = (handicap: number) => {
@@ -647,10 +594,8 @@ ${strengths[0]}을 바탕으로 꾸준한 연습을 하면, ${weaknesses[0]}도 
   return {
     title: golfGodFortune,
     luckyClub: getLuckyClub(),
-    luckyBall: getLuckyBall(),
     luckyHole: getLuckyHole(),
     luckyItem: getLuckyItemFromElement(element),
-    luckyTPO: getLuckyTPO(),
     roundFortune: `${personality}한 성격으로 ${golfStyle}한 플레이가 좋겠습니다.`,
     bettingFortune: `${level} 레벨에 맞는 작은 내기만 하세요. ${strengths[0]}이 강점이니 이를 활용하세요.`,
     courseFortune: `${element} 오행의 기운에 맞는 코스를 선택하세요. ${userInfo.countryClub || '평지 코스'}가 좋겠습니다.`,
