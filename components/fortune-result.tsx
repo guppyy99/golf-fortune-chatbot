@@ -5,6 +5,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { UserInfo, FortuneAnalysis } from "./golf-fortune-app"
 
 // 운세 텍스트를 섹션별로 파싱하는 함수
+function renderSectionalFortune(fortuneData: any) {
+  if (!fortuneData || typeof fortuneData !== 'object') return null
+
+  const sections = [
+    { key: 'greeting', type: 'greeting', title: '인사말', icon: '👋' },
+    { key: 'overallFlow', type: 'overall', title: '전반 기류', icon: '🌊' },
+    { key: 'mentalFortune', type: 'mental', title: '멘탈 운', icon: '🧠' },
+    { key: 'skillFortune', type: 'skill', title: '기술 운', icon: '⚡' },
+    { key: 'physicalFortune', type: 'physical', title: '체력 운', icon: '💪' },
+    { key: 'networkFortune', type: 'network', title: '인맥 운', icon: '🤝' },
+    { key: 'overallMessage', type: 'summary', title: '종합 메시지', icon: '🎯' },
+    { key: 'finalAdvice', type: 'final', title: '마무리 조언', icon: '✨' }
+  ]
+
+  return sections.map((section, index) => {
+    const content = fortuneData[section.key]
+    if (!content) return null
+
+    const sectionConfig = getSectionConfig(section.type)
+    return (
+      <div key={index} className={`p-6 rounded-xl border ${sectionConfig.bg} ${sectionConfig.border}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${sectionConfig.iconBg}`}>
+            <span className="text-white text-sm">{sectionConfig.icon}</span>
+          </div>
+          <h3 className={`text-xl font-bold ${sectionConfig.titleColor}`}>
+            {sectionConfig.title}
+          </h3>
+        </div>
+        <div className={`text-base leading-relaxed ${sectionConfig.textColor} whitespace-pre-wrap font-medium`}>
+          {content}
+        </div>
+      </div>
+    )
+  })
+}
+
 function parseFortuneSections(fortuneText: string) {
   if (!fortuneText) return null
 
@@ -36,7 +73,7 @@ function parseFortuneSections(fortuneText: string) {
   if (sections.length === 0) {
     return (
       <div className="p-6 rounded-xl border bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200">
-        <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+        <div className="text-base leading-relaxed text-gray-700 whitespace-pre-wrap font-medium">
           {fortuneText}
         </div>
       </div>
@@ -51,11 +88,11 @@ function parseFortuneSections(fortuneText: string) {
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${sectionConfig.iconBg}`}>
             <span className="text-white text-sm">{sectionConfig.icon}</span>
           </div>
-          <h3 className={`text-lg font-bold ${sectionConfig.titleColor}`}>
+          <h3 className={`text-xl font-bold ${sectionConfig.titleColor}`}>
             {sectionConfig.title}
           </h3>
         </div>
-        <div className={`text-sm leading-relaxed ${sectionConfig.textColor} whitespace-pre-wrap`}>
+        <div className={`text-base leading-relaxed ${sectionConfig.textColor} whitespace-pre-wrap font-medium`}>
           {section.content}
         </div>
       </div>
@@ -66,6 +103,15 @@ function parseFortuneSections(fortuneText: string) {
 // 섹션별 설정
 function getSectionConfig(type: string) {
   const configs = {
+    greeting: {
+      title: '인사말',
+      icon: '👋',
+      iconBg: 'bg-gradient-to-br from-green-400 to-emerald-400',
+      bg: 'bg-gradient-to-r from-green-50 to-emerald-50',
+      border: 'border-green-100',
+      titleColor: 'text-green-800',
+      textColor: 'text-green-700'
+    },
     overall: {
       title: '전반 기류',
       icon: '🌊',
@@ -211,7 +257,10 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
                 </div>
                 
                 <div className="space-y-6">
-                  {parseFortuneSections(fortuneData.fortune?.title || '')}
+                  {typeof fortuneData.fortune?.title === 'object' 
+                    ? renderSectionalFortune(fortuneData.fortune.title)
+                    : parseFortuneSections(fortuneData.fortune?.title || '')
+                  }
                 </div>
               </CardContent>
             </Card>

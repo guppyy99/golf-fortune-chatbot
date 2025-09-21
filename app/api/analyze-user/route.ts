@@ -506,7 +506,44 @@ function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
   const element = analysis?.element || '木'
   const elementName = analysis?.element_name || '목의 기운'
   
-  // 골신 할아버지 스타일 기본 운세 생성 (사용자 요청 형태)
+  // 구문별 운세 생성 함수
+  function generateSectionalFortune(userInfo: UserInfo, analysis: any) {
+    const personality = analysis?.personality || '활발하고 도전적'
+    const golfStyle = analysis?.golf_style || '균형적'
+    const strengths = analysis?.strengths || ['드라이버']
+    const weaknesses = analysis?.weaknesses || ['퍼팅']
+    const elementName = analysis?.element_name || '목의 기운'
+    const level = getHandicapLevel(userInfo.handicap)
+    
+    return {
+      greeting: `좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
+생년월일 보니, ${userInfo.birthDate}생… ${userInfo.gender}라구? 음, 기운이 뚜렷하네.`,
+      
+      overallFlow: `올해 자네 골프 운세는 ${elementName}의 기운이 강하게 들어와 있네. ${personality}한 성격으로 ${golfStyle}한 플레이가 잘 맞을 걸세.`,
+      
+      mentalFortune: `골프는 멘탈이 절반이야. 올해 자네는 OB나 해저드에 빠져도,
+그 다음 샷에 집중하면 흐름이 다시 살아날 거라네.
+"다음 샷이 가장 중요한 샷이다" 이 말을 늘 마음에 새겨두게.`,
+      
+      skillFortune: `${strengths[0] || '롱게임'}은 아직 들쑥날쑥하지만, 올해는 숏게임에서 성과가 크게 보일 걸세.
+웨지 감각이 빨리 붙고, 퍼트에서도 손맛이 좋아질 테니… 작은 연습도 헛되지 않을 걸세.`,
+      
+      physicalFortune: `몸의 기운이 순환하는 해라, 무리하게 치는 것보다 라운딩 뒤 회복과 스트레칭이 중요하다네.
+부상만 없으면 올해는 계속 즐겁게 칠 수 있을 게야.`,
+      
+      networkFortune: `동반자 운이 강하게 들어와 있네.
+좋은 멘토 같은 골퍼를 만나, 기술도 배우고 골프 철학도 익힐 기회가 있겠구먼.
+혼자 하는 골프보다, 같이 하는 골프에서 큰 운이 트일 걸세.`,
+      
+      overallMessage: `올해 자네 골프 운세는 말이야,
+"한 방에 확 튀어 오르는 해"가 아니라, 땅을 다지고 천천히 기초를 세우는 해라네.
+아직은 백돌이지만, 폼과 루틴만 착실히 챙기면 성장 속도가 남들보다 빠를 게야.`,
+      
+      finalAdvice: `허허, 그러니 너무 조급해 말고… 올해는 ${strengths[0] || '기본기'}와 멘탈, 그리고 기본기만 믿고 가면, 자네 골프 인생에 큰 길이 열릴 걸세.`
+    }
+  }
+
+  // 기존 템플릿 방식도 유지 (호환성)
   const fortuneTemplates = [
     // 템플릿 1: 성장형
     `좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
@@ -605,12 +642,11 @@ ${level} 레벨에서 안정적으로 실력을 쌓아가면, 언젠가는 큰 �
 허허, 서두르지 말고… 올해는 ${strengths[0]}을 다지고, ${weaknesses[0]}을 보완하는 차분한 한 해로 만들어보게.`
   ]
   
-  // 랜덤하게 템플릿 선택
-  const selectedTemplate = fortuneTemplates[Math.floor(Math.random() * fortuneTemplates.length)]
-  const golfGodFortune = selectedTemplate
+  // 구문별 운세 생성
+  const sectionalFortune = generateSectionalFortune(userInfo, analysis)
   
   return {
-    title: golfGodFortune,
+    title: sectionalFortune,
     luckyClub: getLuckyClub(),
     luckyHole: getLuckyHole(),
     luckyItem: getLuckyItemFromElement(element),

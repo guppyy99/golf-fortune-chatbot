@@ -378,29 +378,38 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
                     {!noBirthTime && (
                       <div className="space-y-3">
                         <Label className="text-sm text-gray-500">출생시간을 선택해주세요</Label>
-                        <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                          <div className="grid grid-cols-6 gap-1">
-                            {Array.from({ length: 144 }, (_, i) => {
-                              const hour = Math.floor(i / 6)
-                              const minute = (i % 6) * 10
-                              const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-                              return (
-                                <Button
-                                  key={timeString}
-                                  variant={formData.birthTime === timeString ? "default" : "outline"}
-                                  onClick={() => updateFormData("birthTime", timeString)}
-                                  className={`h-8 text-xs ${
-                                    formData.birthTime === timeString
-                                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
-                                  }`}
-                                >
-                                  {timeString}
-                                </Button>
-                              )
-                            })}
-                          </div>
+                        
+                        {/* 시간대 토글 */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { label: "새벽", time: "새벽 (00:00-06:00)", value: "새벽" },
+                            { label: "아침", time: "아침 (06:00-12:00)", value: "아침" },
+                            { label: "오후", time: "오후 (12:00-18:00)", value: "오후" },
+                            { label: "저녁", time: "저녁 (18:00-24:00)", value: "저녁" }
+                          ].map((timeSlot) => (
+                            <Button
+                              key={timeSlot.value}
+                              variant={formData.birthTime === timeSlot.value ? "default" : "outline"}
+                              onClick={() => updateFormData("birthTime", timeSlot.value)}
+                              className={`h-12 text-sm font-medium ${
+                                formData.birthTime === timeSlot.value
+                                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-300"
+                              }`}
+                            >
+                              {timeSlot.label}
+                            </Button>
+                          ))}
                         </div>
+                        
+                        {/* 선택된 시간대 표시 */}
+                        {formData.birthTime && (
+                          <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <span className="text-sm text-blue-700 font-medium">
+                              선택: {formData.birthTime} 시간대
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
 
