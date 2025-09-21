@@ -79,135 +79,57 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
         </CardContent>
       </Card>
 
-            {/* 사주 분석 결과 */}
-            {fortuneData.analysis && (
-              <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    사주 분석 결과
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-100">
-                      <h3 className="font-semibold text-purple-600 mb-2">당신의 사주</h3>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{fortuneData.analysis.sajuSummary || '사주 정보를 불러오는 중...'}</p>
-                    </div>
-                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100">
-                      <h3 className="font-semibold text-orange-600 mb-2">오행</h3>
-                      <p className="text-gray-700 text-sm font-medium">{fortuneData.analysis.element_name || fortuneData.analysis.element || '목(木)'}</p>
-                      <p className="text-gray-600 text-xs mt-1 whitespace-pre-wrap">{fortuneData.analysis.element_description || '오행 정보를 불러오는 중...'}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
-                      <h3 className="font-semibold text-green-600 mb-2">골프 성격</h3>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{fortuneData.analysis.personality || '성격 분석 중...'}</p>
-                    </div>
-                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-100">
-                      <h3 className="font-semibold text-blue-600 mb-2">플레이 스타일</h3>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{fortuneData.analysis.golfStyle || '스타일 분석 중...'}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-4 rounded-xl border border-yellow-100">
-                      <h3 className="font-semibold text-yellow-600 mb-2">강점</h3>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{Array.isArray(fortuneData.analysis.strengths) ? fortuneData.analysis.strengths.join(', ') : (fortuneData.analysis.strengths || '강점 분석 중...')}</p>
-                    </div>
-                    <div className="bg-gradient-to-r from-red-50 to-pink-50 p-4 rounded-xl border border-red-100">
-                      <h3 className="font-semibold text-red-600 mb-2">약점</h3>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{Array.isArray(fortuneData.analysis.weaknesses) ? fortuneData.analysis.weaknesses.join(', ') : (fortuneData.analysis.weaknesses || '약점 분석 중...')}</p>
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100">
-                    <h3 className="font-semibold text-indigo-600 mb-2">행운 요소</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {Array.isArray(fortuneData.analysis.lucky_elements) ? (
-                        fortuneData.analysis.lucky_elements.map((element, index) => (
-                          <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
-                            {element}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
-                          {fortuneData.analysis.lucky_elements}
-                        </span>
-                      )}
-                      {fortuneData.analysis.lucky_numbers && (
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
-                          행운의 숫자: {Array.isArray(fortuneData.analysis.lucky_numbers) ? fortuneData.analysis.lucky_numbers.join(', ') : fortuneData.analysis.lucky_numbers}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
+            {/* 올해 골프 운세 */}
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  올해 골프 운세
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="font-semibold text-emerald-600 mb-2">1) 나의 전반적 기류</h3>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.roundFortune || '전반적 기류를 분석하는 중...'}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 상세 운세 */}
             <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader>
                 <CardTitle className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                   상세 운세
                 </CardTitle>
               </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="font-semibold text-emerald-600 mb-2">1) 멘탈 운</h3>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.bettingFortune || '멘탈 운을 분석하는 중...'}</p>
+                </div>
 
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="font-semibold text-emerald-600 mb-2">1) 내기 운</h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.bettingFortune || '내기 운을 분석하는 중...'}</p>
-          </div>
+                <div>
+                  <h3 className="font-semibold text-emerald-600 mb-2">2) 기술 운</h3>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.strategyFortune || '기술 운을 분석하는 중...'}</p>
+                </div>
 
-          <div>
-            <h3 className="font-semibold text-emerald-600 mb-2">2) 골프장 운</h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.courseFortune || '골프장 운을 분석하는 중...'}</p>
-          </div>
+                <div>
+                  <h3 className="font-semibold text-emerald-600 mb-2">3) 체력 운</h3>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.scoreFortune || '체력 운을 분석하는 중...'}</p>
+                </div>
 
-          <div>
-            <h3 className="font-semibold text-emerald-600 mb-2">3) 스코어 운</h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.scoreFortune || '스코어 운을 분석하는 중...'}</p>
-          </div>
+                <div>
+                  <h3 className="font-semibold text-emerald-600 mb-2">4) 대인 & 인맥 운</h3>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.courseFortune || '대인 & 인맥 운을 분석하는 중...'}</p>
+                </div>
 
-          <div>
-            <h3 className="font-semibold text-emerald-600 mb-2">4) 공략 운</h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.strategyFortune || '공략 운을 분석하는 중...'}</p>
-          </div>
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-xl border border-emerald-100 text-center">
+                  <h3 className="font-semibold text-emerald-600 mb-2">종합 메시지</h3>
+                  <p className="text-gray-700 italic text-lg whitespace-pre-wrap">"{fortuneData.fortune?.quote || '종합 메시지를 준비하는 중...'}"</p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-xl border border-emerald-100 text-center">
-            <h3 className="font-semibold text-emerald-600 mb-2">5) 마무리 한줄</h3>
-            <p className="text-gray-700 italic text-lg whitespace-pre-wrap">"{fortuneData.fortune?.quote || '마무리 메시지를 준비하는 중...'}"</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 데이터 저장 정보 표시 */}
-      {fortuneData.exportInfo && (
-        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              📁 데이터 저장 완료
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500">JSON 파일:</span>
-                <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                  {fortuneData.exportInfo.jsonPath?.split('/').pop()}
-                </code>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500">CSV 파일:</span>
-                <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                  {fortuneData.exportInfo.csvPath?.split('/').pop()}
-                </code>
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                저장 위치: /data/users/ 디렉토리
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="flex gap-4">
         <Button

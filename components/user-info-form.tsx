@@ -26,8 +26,30 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false)
 
   const basicSteps = 6 // 기본 6단계: 이름, 휴대폰번호, 성별, 생년월일, 출생시간, 핸디캡
-  const additionalSteps = 6 // 추가 정보 6단계: CC, 아이언, 드라이버, 웨지, 퍼터, 볼
+  const additionalSteps = 1 // 추가 정보 1단계: 브랜드 선택 (CC + 아이언 + 드라이버 + 퍼터)
   const totalSteps = basicSteps + (wantsAdditionalInfo ? additionalSteps : 0)
+
+  // 골프 브랜드 옵션들 (가나다 순)
+  const golfBrands = [
+    "기타",
+    "네이키",
+    "데이비드 글로브",
+    "마이크로스",
+    "미즈노",
+    "브리지스톤",
+    "시리우스",
+    "아이언맨",
+    "알디라",
+    "에픽",
+    "오디세이",
+    "윌슨",
+    "캘러웨이",
+    "카본",
+    "코브라",
+    "타이틀리스트",
+    "테일러메이드",
+    "핑",
+  ]
 
   const handleNext = () => {
     if (step === basicSteps) {
@@ -49,7 +71,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
   const handleAdditionalInfoYes = () => {
     setShowAdditionalInfo(false)
     setWantsAdditionalInfo(true)
-    setStep(basicSteps + 1) // 추가 정보 첫 번째 단계로
+    setStep(7) // 브랜드 선택 단계로
   }
 
   const handleAdditionalInfoNo = () => {
@@ -65,7 +87,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
 
   const handleSummaryEdit = () => {
     setShowSummaryModal(false)
-    setStep(totalSteps) // 마지막 단계로 이동하여 수정 가능
+    setStep(wantsAdditionalInfo ? 7 : 6) // 마지막 단계로 이동하여 수정 가능
   }
 
   const handleTermsAccept = () => {
@@ -96,12 +118,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
 
   const getFieldName = (step: number): keyof UserInfo => {
     switch (step) {
-      case 7: return "countryClub"
-      case 8: return "ironBrand"
-      case 9: return "driverBrand"
-      case 10: return "wedgeBrand"
-      case 11: return "putterBrand"
-      case 12: return "ballBrand"
+      case 7: return "countryClub" // 브랜드 선택 단계에서는 countryClub만 사용
       default: return "name"
     }
   }
@@ -120,18 +137,8 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
         return formData.birthTime || noBirthTime
       case 6:
         return formData.handicap !== undefined
-      case 7: // CC
-        return formData.countryClub || noCountryClub
-      case 8: // 아이언
-        return formData.ironBrand && formData.ironBrand.trim() !== ""
-      case 9: // 드라이버
-        return formData.driverBrand && formData.driverBrand.trim() !== ""
-      case 10: // 웨지
-        return formData.wedgeBrand && formData.wedgeBrand.trim() !== ""
-      case 11: // 퍼터
-        return formData.putterBrand && formData.putterBrand.trim() !== ""
-      case 12: // 볼
-        return formData.ballBrand && formData.ballBrand.trim() !== ""
+      case 7: // 브랜드 선택
+        return true // 브랜드 선택은 모두 선택사항
       default:
         return false
     }
@@ -141,7 +148,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
     switch (step) {
       case 1:
         return {
-          title: "골프 운세를 볼 당신의\n이름은?",
+          title: "골신에게 운세를 볼 당신의\n이름은?",
           subtitle: "이름",
           placeholder: "이름을 적어 주세요",
         }
@@ -172,45 +179,14 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
         }
       case 6:
         return {
-          title: `${formData.name || "김선우"}님의\n평균 핸디캡은?`,
+          title: `${formData.name || "김선우"}님의\n평균 핸디캡을 알려주세요.`,
           subtitle: "핸디캡",
           helper: "기본값 28에서 조절하세요",
         }
       case 7:
         return {
-          title: `${formData.name || "김선우"}님이\n오늘 방문하는 CC는?`,
-          subtitle: "방문하는 CC",
-          placeholder: "골프장 이름을 입력해주세요",
-        }
-      case 8:
-        return {
-          title: `${formData.name || "김선우"}님의\n아이언 브랜드/제품은?`,
-          subtitle: "아이언 브랜드/제품",
-          placeholder: "예: Titleist T200",
-        }
-      case 9:
-        return {
-          title: `${formData.name || "김선우"}님의\n드라이버 브랜드/제품은?`,
-          subtitle: "드라이버 브랜드/제품",
-          placeholder: "예: Callaway Mavrik",
-        }
-      case 10:
-        return {
-          title: `${formData.name || "김선우"}님의\n웨지 브랜드/제품은?`,
-          subtitle: "웨지 브랜드/제품",
-          placeholder: "예: Vokey SM9",
-        }
-      case 11:
-        return {
-          title: `${formData.name || "김선우"}님의\n퍼터 브랜드/제품은?`,
-          subtitle: "퍼터 브랜드/제품",
-          placeholder: "예: Scotty Cameron (수제라면 수제라고 말해주세요)",
-        }
-      case 12:
-        return {
-          title: `${formData.name || "김선우"}님의\n오늘 공 브랜드/제품은?`,
-          subtitle: "공 브랜드/제품",
-          placeholder: "예: Titleist Pro V1 (로스트볼이라면 로스트볼이라고 말해주세요)",
+          title: `${formData.name || "김선우"}님의\n골프 장비 정보를 알려주세요`,
+          subtitle: "브랜드 선택",
         }
       default:
         return { title: "", subtitle: "", placeholder: "" }
@@ -440,44 +416,98 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
                 </div>
               )}
 
-              {(step >= 7 && step <= 12) && (
-                <div className="transition-all duration-300 ease-in-out">
-                  <Label className="text-sm text-gray-500 mb-2 block">{stepContent.subtitle}</Label>
-                  {step === 7 && (
-                    <div className="flex items-center justify-between mb-4">
-                      <Input
-                        value={noCountryClub ? "" : formData.countryClub || ""}
-                        onChange={(e) => updateFormData("countryClub", e.target.value)}
-                        disabled={noCountryClub}
-                        placeholder={stepContent.placeholder}
-                        className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-0 py-4 text-lg focus:border-blue-600 focus:ring-0 placeholder:text-gray-400 disabled:opacity-50 flex-1 mr-4"
-                      />
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="no-country-club"
-                          checked={noCountryClub}
-                          onCheckedChange={(checked) => {
-                            setNoCountryClub(checked as boolean)
-                            if (checked) {
-                              updateFormData("countryClub", "없어요")
-                            }
-                          }}
-                          className="border-2 border-gray-400 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
-                        />
-                        <Label htmlFor="no-country-club" className="text-sm text-gray-600">
-                          없어요
-                        </Label>
-                      </div>
-                    </div>
-                  )}
-                  {step > 7 && (
+              {step === 7 && (
+                <div className="transition-all duration-300 ease-in-out space-y-6">
+                  {/* 방문 예정 CC */}
+                  <div>
+                    <Label className="text-sm text-gray-500 mb-2 block">방문 예정인 CC가 있으신가요?</Label>
                     <Input
-                      value={formData[getFieldName(step)] || ""}
-                      onChange={(e) => updateFormData(getFieldName(step), e.target.value)}
-                      placeholder={stepContent.placeholder}
-                      className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-0 py-4 text-lg focus:border-blue-600 focus:ring-0 placeholder:text-gray-400 w-full"
+                      value={noCountryClub ? "" : formData.countryClub || ""}
+                      onChange={(e) => updateFormData("countryClub", e.target.value)}
+                      disabled={noCountryClub}
+                      placeholder="골프장 이름을 입력해주세요"
+                      className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-0 py-4 text-lg focus:border-blue-600 focus:ring-0 placeholder:text-gray-400 disabled:opacity-50 w-full"
                     />
-                  )}
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Checkbox
+                        id="no-country-club"
+                        checked={noCountryClub}
+                        onCheckedChange={(checked) => {
+                          setNoCountryClub(checked as boolean)
+                          if (checked) {
+                            updateFormData("countryClub", "없어요")
+                          }
+                        }}
+                        className="border-2 border-gray-400 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
+                      />
+                      <Label htmlFor="no-country-club" className="text-sm text-gray-600">
+                        없어요
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* 아이언 브랜드 */}
+                  <div>
+                    <Label className="text-sm text-gray-500 mb-3 block">내 아이언 브랜드</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {golfBrands.map((brand) => (
+                        <Button
+                          key={`iron-${brand}`}
+                          variant={formData.ironBrand === brand ? "default" : "outline"}
+                          onClick={() => updateFormData("ironBrand", brand)}
+                          className={`h-10 text-sm ${
+                            formData.ironBrand === brand
+                              ? "bg-black text-white hover:bg-gray-800"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+                          }`}
+                        >
+                          {brand}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 드라이버 브랜드 */}
+                  <div>
+                    <Label className="text-sm text-gray-500 mb-3 block">내 드라이버 브랜드</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {golfBrands.map((brand) => (
+                        <Button
+                          key={`driver-${brand}`}
+                          variant={formData.driverBrand === brand ? "default" : "outline"}
+                          onClick={() => updateFormData("driverBrand", brand)}
+                          className={`h-10 text-sm ${
+                            formData.driverBrand === brand
+                              ? "bg-black text-white hover:bg-gray-800"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+                          }`}
+                        >
+                          {brand}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 퍼터 브랜드 */}
+                  <div>
+                    <Label className="text-sm text-gray-500 mb-3 block">내 퍼터 브랜드</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {golfBrands.map((brand) => (
+                        <Button
+                          key={`putter-${brand}`}
+                          variant={formData.putterBrand === brand ? "default" : "outline"}
+                          onClick={() => updateFormData("putterBrand", brand)}
+                          className={`h-10 text-sm ${
+                            formData.putterBrand === brand
+                              ? "bg-black text-white hover:bg-gray-800"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+                          }`}
+                        >
+                          {brand}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -542,22 +572,10 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
                   <span className="font-medium">{formData.driverBrand}</span>
                 </div>
               )}
-              {formData.wedgeBrand && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-gray-600">웨지</span>
-                  <span className="font-medium">{formData.wedgeBrand}</span>
-                </div>
-              )}
               {formData.putterBrand && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-gray-600">퍼터</span>
                   <span className="font-medium">{formData.putterBrand}</span>
-                </div>
-              )}
-              {formData.ballBrand && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="text-gray-600">볼</span>
-                  <span className="font-medium">{formData.ballBrand}</span>
                 </div>
               )}
             </div>
@@ -592,7 +610,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
               </button>
             </div>
             <p className="text-gray-600 mb-6 leading-relaxed">
-              아래 시작하기를 누르면 던롭스포츠코리아의 <span className="underline">서비스 이용약관</span> 및{" "}
+              아래 시작하기를 누르면 메가존의 <span className="underline">서비스 이용약관</span> 및{" "}
               <span className="underline">개인정보 처리방침</span>에 동의하는 것으로 간주합니다.
             </p>
             <Button

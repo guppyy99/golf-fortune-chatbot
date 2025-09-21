@@ -217,14 +217,13 @@ def create_fortune_prompt(user_info: dict, saju_analysis: dict):
   "luckyClub": "행운의 클럽 (강점과 오행을 고려)",
   "luckyBall": "행운의 볼 (오행 색상 고려)",
   "luckyHole": "행운의 홀 (사주와 관련)",
-  "luckyItem": "행운의 아이템 (오행과 관련)",
   "luckyTPO": "행운의 복장 (행운 색상 포함)",
-  "roundFortune": "라운드 운세 (사주와 성격 반영)",
-  "bettingFortune": "내기 운세 (성격과 스타일 고려)",
-  "courseFortune": "코스 운세 (골프장과 오행 연관)",
-  "scoreFortune": "스코어 운세 (핸디캡과 강약점 고려)",
-  "strategyFortune": "전략 운세 (약점 보완 방안 포함)",
-  "quote": "개인화된 명언 (사주와 골프 스타일 반영)"
+  "roundFortune": "나의 전반적 기류 (올해 전체적인 골프 운세와 기류)",
+  "bettingFortune": "멘탈 운 (골프 플레이 시 정신적 상태와 멘탈 관리)",
+  "strategyFortune": "기술 운 (스윙, 샷 기술, 클럽 사용 등 기술적 측면)",
+  "scoreFortune": "체력 운 (신체 컨디션, 지구력, 건강 상태 등)",
+  "courseFortune": "대인 & 인맥 운 (골프 파트너, 동반자, 골프장 관계자 등)",
+  "quote": "종합 메시지 (개인화된 마무리 메시지)"
 }}
 
 중요: 반드시 JSON 형식으로만 응답하고, 다른 설명은 포함하지 마세요.

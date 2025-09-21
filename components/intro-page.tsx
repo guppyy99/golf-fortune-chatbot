@@ -21,22 +21,22 @@ export function IntroPage({ onStart }: IntroPageProps) {
 
       <div className="p-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
-          나의 오늘의
+          올해 골프 운세를 알려주마
           <br />
-          골프 운세는?
+          너의 운세는 버디일까 OB일까
         </h1>
 
         <p className="text-sm text-gray-600 mb-8 leading-relaxed">
-          던롭스포츠코리아와 함께하는
+          골프의 신 '골신'이 알려주는
           <br />
-          오늘의 라운딩 운세
+          올해의 골프 운세
         </p>
 
         <button
           onClick={onStart}
           className="w-full bg-black text-white py-4 rounded-full font-medium text-lg hover:bg-gray-800 transition-colors"
         >
-          시작하기!
+          운세시작!
         </button>
       </div>
     </div>
