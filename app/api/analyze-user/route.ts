@@ -49,20 +49,13 @@ export async function POST(request: NextRequest) {
     // 페이즈 2: 사용자 정보 분석
     const analysis = await analyzeUserInfo(userInfo)
     
-    // 페이즈 3: 운세 생성 (우선순위: 정적 데이터 > GPT > 기본 운세)
+    // 페이즈 3: OLLAMA API로 직접 운세 생성
     let fortune
     try {
-      // 1순위: 로컬 OLLAMA로 생성된 정적 운세 데이터 사용
-      fortune = await getStaticFortune(userInfo, analysis)
-      if (fortune) {
-        console.log('정적 운세 데이터 사용')
-      } else {
-        // 2순위: OpenAI GPT 사용
-        fortune = await generateFortuneWithGPT(userInfo, analysis)
-        console.log('GPT 모델 사용')
-      }
+      fortune = await generateFortuneWithOllama(userInfo, analysis)
+      console.log('OLLAMA API로 운세 생성 완료')
     } catch (error) {
-      console.log('모든 방법 실패, 기본 운세로 대체...')
+      console.log('OLLAMA API 실패, 기본 운세로 대체...')
       fortune = await generateDefaultFortune(userInfo, analysis)
     }
     
@@ -244,51 +237,64 @@ async function computeSaju(userInfo: UserInfo) {
   }
 }
 
-// 정적 운세 데이터에서 사용자에 맞는 운세 찾기
-async function getStaticFortune(userInfo: UserInfo, analysis: any) {
+// OLLAMA 구독 API로 직접 운세 생성
+async function generateFortuneWithOllama(userInfo: UserInfo, analysis: any) {
   try {
-    // public/fortunes.json에서 정적 운세 데이터 읽기
-    const fortunesPath = path.join(process.cwd(), 'public', 'fortunes.json')
-    
-    if (!fs.existsSync(fortunesPath)) {
-      console.log('정적 운세 데이터 파일이 없습니다.')
-      return null
+    // OLLAMA API 키 확인
+    if (!process.env.OLLAMA_API_KEY) {
+      throw new Error('OLLAMA API 키가 설정되지 않았습니다')
     }
     
-    const fortunesData = fs.readFileSync(fortunesPath, 'utf8')
-    const fortunes = JSON.parse(fortunesData)
+    console.log('OLLAMA 구독 API 호출 시작...')
     
-    // 사용자 이름으로 운세 찾기 (또는 유사한 사용자)
-    const userFortune = fortunes[userInfo.name]
-    
-    if (userFortune) {
-      // 정적 데이터를 현재 형식에 맞게 변환
-      return {
-        title: userFortune.fortune,
-        luckyClub: getLuckyClubFromStrengths(analysis.strengths, userInfo.handicap),
-        luckyHole: getLuckyHoleFromNumbers(analysis.lucky_numbers),
-        luckyItem: getLuckyItemFromElement(analysis.element)
-      }
+    // OLLAMA 구독 서비스 API 호출
+    const response = await fetch('https://api.ollama.ai/v1/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-oss:20b',
+        prompt: createFortunePrompt(userInfo, analysis),
+        stream: false,
+        options: {
+          temperature: 0.8,
+          top_p: 0.9,
+          num_predict: 1500
+        }
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`OLLAMA API 오류: ${response.status} ${response.statusText}`)
     }
+
+    const data = await response.json()
+    console.log('OLLAMA 응답 받음')
     
-    return null
+    if (data.response) {
+      const fortune = parseFortuneResponse(data.response, userInfo, analysis)
+      console.log('운세 파싱 완료')
+      return fortune
+    } else {
+      throw new Error('OLLAMA 응답에 response 필드가 없습니다')
+    }
   } catch (error) {
-    console.error('정적 운세 데이터 읽기 오류:', error)
-    return null
+    console.error('OLLAMA API 운세 생성 오류:', error)
+    throw error
   }
 }
 
+// 백업용 GPT 함수 (OLLAMA 실패시 사용)
 async function generateFortuneWithGPT(userInfo: UserInfo, analysis: any) {
   try {
-    // OpenAI API 키가 없으면 기본 운세 사용
     if (!process.env.OPENAI_API_KEY) {
-      console.log('OpenAI API 키가 없어서 기본 운세 생성 사용')
-      return generateDefaultFortune(userInfo, analysis)
+      throw new Error('OpenAI API 키가 없습니다')
     }
     
-    console.log('OpenAI GPT-4o-mini 모델 호출 시작...')
+    console.log('백업 GPT 모델 호출...')
     
-    // OpenAI API 호출
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -296,17 +302,11 @@ async function generateFortuneWithGPT(userInfo: UserInfo, analysis: any) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // GPT-4o-mini 사용 (비용 효율적)
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `당신은 골프의 신 '골신' 할아버지입니다. 100년 넘게 골프를 지켜본 신선으로서, 사용자의 운세를 봐주세요. 
-
-특징:
-- 할아버지 톤으로 "자네", "~라네", "~구먼", "~걸세" 사용
-- 현실적이면서도 희망적인 조언 제공
-- 과도한 확정 표현은 피하고, "~일 걸세", "~할 거라네" 등 사용
-- 각 섹션마다 적절한 이모지와 구분자 사용`
+            content: `당신은 골프의 신 '골신' 할아버지입니다. 100년 넘게 골프를 지켜본 신선으로서, 사용자의 운세를 봐주세요.`
           },
           {
             role: 'user',
@@ -314,8 +314,7 @@ async function generateFortuneWithGPT(userInfo: UserInfo, analysis: any) {
           }
         ],
         temperature: 0.8,
-        max_tokens: 1500,
-        top_p: 0.9
+        max_tokens: 1500
       })
     })
 
@@ -324,18 +323,13 @@ async function generateFortuneWithGPT(userInfo: UserInfo, analysis: any) {
     }
 
     const data = await response.json()
-    console.log('OpenAI 응답:', data)
-
-    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-      const fortune = parseFortuneResponse(data.choices[0].message.content, userInfo, analysis)
-      console.log('파싱된 운세:', fortune)
-      return fortune
-    } else {
-      throw new Error('OpenAI 응답에 content 필드가 없습니다')
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      return parseFortuneResponse(data.choices[0].message.content, userInfo, analysis)
     }
+    throw new Error('OpenAI 응답 파싱 실패')
   } catch (error) {
-    console.error('OpenAI 운세 생성 오류:', error)
-    return generateDefaultFortune(userInfo, analysis)
+    console.error('GPT 백업 오류:', error)
+    throw error
   }
 }
 
