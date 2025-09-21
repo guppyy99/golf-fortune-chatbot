@@ -16,35 +16,110 @@ ELEMENT_TO_GOLF_STYLE = {
         "strengths": ["드라이버", "장타"],
         "weaknesses": ["퍼팅", "정확성"],
         "lucky_colors": ["초록", "파랑"],
-        "lucky_numbers": [3, 8]
+        "lucky_numbers": [3, 8],
+        "lucky_clubs": {
+            "primary": "드라이버",
+            "secondary": "아이언",
+            "description": "강력한 드라이버로 페어웨이를 정복하는 클럽"
+        },
+        "lucky_balls": {
+            "primary": "초록색 볼",
+            "secondary": "파란색 볼", 
+            "description": "자연의 기운을 담은 색상의 볼"
+        },
+        "lucky_tpo": {
+            "primary": "초록색 골프웨어",
+            "secondary": "파란색 골프웨어",
+            "description": "자연과 조화를 이루는 색상의 복장"
+        }
     },
     "火": {
         "style": "열정적이고 활발",
         "strengths": ["아이언", "어프로치"],
         "weaknesses": ["멘탈", "집중력"],
         "lucky_colors": ["빨강", "주황"],
-        "lucky_numbers": [2, 7]
+        "lucky_numbers": [2, 7],
+        "lucky_clubs": {
+            "primary": "아이언",
+            "secondary": "웨지",
+            "description": "정확한 아이언으로 핀을 노리는 클럽"
+        },
+        "lucky_balls": {
+            "primary": "빨간색 볼",
+            "secondary": "주황색 볼",
+            "description": "열정을 불러일으키는 색상의 볼"
+        },
+        "lucky_tpo": {
+            "primary": "빨간색 골프웨어",
+            "secondary": "주황색 골프웨어", 
+            "description": "활력과 열정을 보여주는 색상의 복장"
+        }
     },
     "土": {
         "style": "안정적이고 신중",
         "strengths": ["퍼팅", "정확성"],
         "weaknesses": ["장타", "공격성"],
         "lucky_colors": ["노랑", "갈색"],
-        "lucky_numbers": [5, 0]
+        "lucky_numbers": [5, 0],
+        "lucky_clubs": {
+            "primary": "퍼터",
+            "secondary": "웨지",
+            "description": "안정적인 퍼터로 그린을 정복하는 클럽"
+        },
+        "lucky_balls": {
+            "primary": "노란색 볼",
+            "secondary": "갈색 볼",
+            "description": "안정감을 주는 색상의 볼"
+        },
+        "lucky_tpo": {
+            "primary": "노란색 골프웨어",
+            "secondary": "갈색 골프웨어",
+            "description": "신뢰감을 주는 색상의 복장"
+        }
     },
     "金": {
         "style": "정확하고 완벽주의",
         "strengths": ["아이언", "샌드웨지"],
         "weaknesses": ["드라이버", "유연성"],
         "lucky_colors": ["흰색", "금색"],
-        "lucky_numbers": [4, 9]
+        "lucky_numbers": [4, 9],
+        "lucky_clubs": {
+            "primary": "샌드웨지",
+            "secondary": "아이언",
+            "description": "정밀한 샌드웨지로 정확성을 높이는 클럽"
+        },
+        "lucky_balls": {
+            "primary": "흰색 볼",
+            "secondary": "금색 볼",
+            "description": "순수함과 완벽함을 상징하는 색상의 볼"
+        },
+        "lucky_tpo": {
+            "primary": "흰색 골프웨어",
+            "secondary": "금색 골프웨어",
+            "description": "깔끔하고 세련된 색상의 복장"
+        }
     },
     "水": {
         "style": "유연하고 적응력 좋음",
         "strengths": ["퍼팅", "그린플레이"],
         "weaknesses": ["아이언", "일관성"],
         "lucky_colors": ["검정", "파랑"],
-        "lucky_numbers": [1, 6]
+        "lucky_numbers": [1, 6],
+        "lucky_clubs": {
+            "primary": "퍼터",
+            "secondary": "드라이버",
+            "description": "유연한 퍼터로 그린 위에서 승부하는 클럽"
+        },
+        "lucky_balls": {
+            "primary": "검은색 볼",
+            "secondary": "파란색 볼",
+            "description": "차분함과 집중력을 주는 색상의 볼"
+        },
+        "lucky_tpo": {
+            "primary": "검은색 골프웨어",
+            "secondary": "파란색 골프웨어",
+            "description": "차분하고 우아한 색상의 복장"
+        }
     }
 }
 
@@ -132,7 +207,10 @@ def analyze_golf_personality(saju_data: dict, handicap: int, gender: str):
         "saju_summary": saju_data.get("saju_summary", f"{saju_data.get('year_gan', '甲')}{saju_data.get('year_zhi', '子')}년 {saju_data.get('month_gan', '甲')}{saju_data.get('month_zhi', '子')}월 {saju_data.get('day_gan', '甲')}{saju_data.get('day_zhi', '子')}일 {saju_data.get('hour_gan', '甲')}{saju_data.get('hour_zhi', '子')}시"),
         "element_name": get_element_name(element),
         "element_description": get_element_description(element),
-        "lucky_numbers": element_info["lucky_numbers"]
+        "lucky_numbers": element_info["lucky_numbers"],
+        "lucky_club": element_info["lucky_clubs"]["primary"],
+        "lucky_ball": element_info["lucky_balls"]["primary"],
+        "lucky_tpo": element_info["lucky_tpo"]["primary"]
     }
 
 def get_element_name(element: str) -> str:
@@ -187,44 +265,64 @@ def generate_recommendations(element: str, handicap: int, element_info: dict):
 
 def create_fortune_prompt(user_info: dict, saju_analysis: dict):
     """
-    사주 분석 결과를 바탕으로 OLLAMA 프롬프트 생성
+    사주 분석 결과를 바탕으로 골신 할아버지 스타일 프롬프트 생성
     """
     return f"""
-당신은 전문 골프 운세사입니다. 다음 사용자 정보와 사주 분석을 바탕으로 골프 운세를 작성해주세요.
+당신은 골프의 신 '골신' 할아버지입니다. 100년 넘게 골프를 지켜본 신선으로서, 사용자의 운세를 봐주세요.
 
 === 사용자 정보 ===
 - 이름: {user_info['name']}
 - 생년월일: {user_info['birthDate']}
 - 성별: {user_info['gender']}
 - 핸디캡: {user_info['handicap']}
-- 자주 가는 골프장: {user_info['countryClub']}
+- 방문 예정 CC: {user_info.get('countryClub', '미정')}
 
 === 사주 분석 결과 ===
 - 사주: {saju_analysis['saju_summary']}
-- 오행: {saju_analysis['element']}
+- 오행: {saju_analysis['element']} ({saju_analysis['element_name']})
 - 성격: {saju_analysis['personality']}
 - 골프 스타일: {saju_analysis['golf_style']}
 - 강점: {', '.join(saju_analysis['strengths'])}
 - 약점: {', '.join(saju_analysis['weaknesses'])}
 - 행운 요소: {saju_analysis['lucky_elements']}
-- 추천사항: {', '.join(saju_analysis['recommendations'])}
+- 행운의 클럽: {saju_analysis['lucky_club']}
+- 행운의 볼: {saju_analysis['lucky_ball']}
+- 행운의 TPO: {saju_analysis['lucky_tpo']}
 
 === 요청사항 ===
-위 정보를 바탕으로 개인화된 골프 운세를 다음 JSON 형식으로 작성해주세요:
+골신 할아버지 톤으로 다음 형식에 맞춰 운세를 작성해주세요:
 
-{{
-  "title": "운세 제목 (사주와 골프 스타일을 반영)",
-  "luckyClub": "행운의 클럽 (강점과 오행을 고려)",
-  "luckyBall": "행운의 볼 (오행 색상 고려)",
-  "luckyHole": "행운의 홀 (사주와 관련)",
-  "luckyTPO": "행운의 복장 (행운 색상 포함)",
-  "roundFortune": "나의 전반적 기류 (올해 전체적인 골프 운세와 기류)",
-  "bettingFortune": "멘탈 운 (골프 플레이 시 정신적 상태와 멘탈 관리)",
-  "strategyFortune": "기술 운 (스윙, 샷 기술, 클럽 사용 등 기술적 측면)",
-  "scoreFortune": "체력 운 (신체 컨디션, 지구력, 건강 상태 등)",
-  "courseFortune": "대인 & 인맥 운 (골프 파트너, 동반자, 골프장 관계자 등)",
-  "quote": "종합 메시지 (개인화된 마무리 메시지)"
-}}
+[인사말]
+좋네… 자네 {user_info['name']}의 운세를 보자고 했지?
+생년월일 보니, {user_info['birthDate']}생… {user_info.get('birthTime', '낮')}에 태어난 {user_info['gender']}라구? 음, 기운이 뚜렷하네.
 
-중요: 반드시 JSON 형식으로만 응답하고, 다른 설명은 포함하지 마세요.
+:골프를_치는_{user_info['gender']}: 전반 기류
+[올해 골프 운세에 대한 전반적인 이야기 - 3-4문장]
+
+:대체로_맑음: 세부 운세
+
+멘탈 운
+[멘탈 관리에 대한 운세 - 2-3문장]
+
+기술 운
+[기술적 측면의 운세 - 2-3문장]
+
+체력 운
+[체력과 건강에 대한 운세 - 2-3문장]
+
+인맥 운
+[인간관계와 동반자에 대한 운세 - 2-3문장]
+
+:골프: 종합
+[올해 전체적인 메시지와 조언 - 3-4문장]
+
+[마무리 한줄]
+허허, 그러니 너무 조급해 말고… [간단한 조언 한 문장]
+
+=== 작성 규칙 ===
+- 할아버지 톤으로 "자네", "~라네", "~구먼", "~걸세" 사용
+- 사주 정보를 자연스럽게 언급하면서 운세 설명
+- 현실적이면서도 희망적인 조언 제공
+- 과도한 확정 표현은 피하고, "~일 걸세", "~할 거라네" 등 사용
+- 이모지는 적절히 사용하되 과하지 않게
 """

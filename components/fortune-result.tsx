@@ -80,52 +80,19 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
       </Card>
 
 
-            {/* 올해 골프 운세 */}
+            {/* 골신 할아버지 운세 */}
             <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  올해 골프 운세
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold text-emerald-600 mb-2">1) 나의 전반적 기류</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.roundFortune || '전반적 기류를 분석하는 중...'}</p>
+              <CardContent className="p-8">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                    <span className="text-3xl">🧙‍♂️</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-amber-800 mb-2">골신 할아버지의 운세</h2>
+                  <p className="text-gray-600">100년 넘게 골프를 지켜본 신선의 지혜</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* 상세 운세 */}
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  상세 운세
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold text-emerald-600 mb-2">1) 멘탈 운</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.bettingFortune || '멘탈 운을 분석하는 중...'}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-emerald-600 mb-2">2) 기술 운</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.strategyFortune || '기술 운을 분석하는 중...'}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-emerald-600 mb-2">3) 체력 운</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.scoreFortune || '체력 운을 분석하는 중...'}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-emerald-600 mb-2">4) 대인 & 인맥 운</h3>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{fortuneData.fortune?.courseFortune || '대인 & 인맥 운을 분석하는 중...'}</p>
-                </div>
-
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-xl border border-emerald-100 text-center">
-                  <h3 className="font-semibold text-emerald-600 mb-2">종합 메시지</h3>
-                  <p className="text-gray-700 italic text-lg whitespace-pre-wrap">"{fortuneData.fortune?.quote || '종합 메시지를 준비하는 중...'}"</p>
+                
+                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {fortuneData.fortune?.title || '골신 할아버지가 운세를 준비하고 있습니다...'}
                 </div>
               </CardContent>
             </Card>
