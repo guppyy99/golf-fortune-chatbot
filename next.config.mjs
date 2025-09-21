@@ -15,6 +15,12 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: [],
   },
+  // 정적 내보내기 비활성화 (Vercel에서는 필요없음)
+  output: undefined,
+  trailingSlash: false,
+  // 빌드 최적화
+  compress: true,
+  poweredByHeader: false,
 }
 
 export default nextConfig
