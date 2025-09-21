@@ -49,8 +49,14 @@ export async function POST(request: NextRequest) {
     // 페이즈 2: 사용자 정보 분석
     const analysis = await analyzeUserInfo(userInfo)
     
-    // 페이즈 3: OLLAMA를 통한 운세 생성
-    const fortune = await generateFortuneWithOllama(userInfo, analysis)
+    // 페이즈 3: OLLAMA를 통한 운세 생성 (우선), 실패시 GPT 사용
+    let fortune
+    try {
+      fortune = await generateFortuneWithOllama(userInfo, analysis)
+    } catch (error) {
+      console.log('OLLAMA 실패, GPT로 대체 시도...')
+      fortune = await generateFortuneWithGPT(userInfo, analysis)
+    }
     
     // JSON 형태로 저장
     const result = {
@@ -232,24 +238,23 @@ async function computeSaju(userInfo: UserInfo) {
 
 async function generateFortuneWithOllama(userInfo: UserInfo, analysis: any) {
   try {
-    // Vercel 환경에서는 OLLAMA 사용 불가
-    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-      console.log('Vercel 환경에서 기본 운세 생성 사용')
-      return generateDefaultFortune(userInfo, analysis)
-    }
-    
     console.log('OLLAMA 모델 호출 시작...')
     
-    // OLLAMA API 호출 (로컬 환경에서만)
+    // OLLAMA API 호출
     const response = await fetch('http://localhost:11434/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'golf-fortune',
+        model: 'gpt-oss:20b',
         prompt: createFortunePrompt(userInfo, analysis),
-        stream: false
+        stream: false,
+        options: {
+          temperature: 0.8,
+          top_p: 0.9,
+          max_tokens: 1500
+        }
       })
     })
 
@@ -260,15 +265,77 @@ async function generateFortuneWithOllama(userInfo: UserInfo, analysis: any) {
     const data = await response.json()
     console.log('OLLAMA 응답:', data.response)
     
-    // 응답 파싱
-    const fortune = parseFortuneResponse(data.response, userInfo, analysis)
-    console.log('파싱된 운세:', fortune)
-    
-    return fortune
-    
+    if (data.response) {
+      const fortune = parseFortuneResponse(data.response, userInfo, analysis)
+      console.log('파싱된 운세:', fortune)
+      return fortune
+    } else {
+      throw new Error('OLLAMA 응답에 response 필드가 없습니다')
+    }
   } catch (error) {
     console.error('OLLAMA 운세 생성 오류:', error)
-    // 오류 시 기본 운세 반환
+    console.log('OLLAMA 실패, 기본 운세로 대체')
+    return generateDefaultFortune(userInfo, analysis)
+  }
+}
+
+async function generateFortuneWithGPT(userInfo: UserInfo, analysis: any) {
+  try {
+    // OpenAI API 키가 없으면 기본 운세 사용
+    if (!process.env.OPENAI_API_KEY) {
+      console.log('OpenAI API 키가 없어서 기본 운세 생성 사용')
+      return generateDefaultFortune(userInfo, analysis)
+    }
+    
+    console.log('OpenAI GPT 모델 호출 시작...')
+    
+    // OpenAI API 호출
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', // GPT-4o-mini 사용 (비용 효율적)
+        messages: [
+          {
+            role: 'system',
+            content: `당신은 골프의 신 '골신' 할아버지입니다. 100년 넘게 골프를 지켜본 신선으로서, 사용자의 운세를 봐주세요. 
+
+특징:
+- 할아버지 톤으로 "자네", "~라네", "~구먼", "~걸세" 사용
+- 현실적이면서도 희망적인 조언 제공
+- 과도한 확정 표현은 피하고, "~일 걸세", "~할 거라네" 등 사용
+- 각 섹션마다 적절한 이모지와 구분자 사용`
+          },
+          {
+            role: 'user',
+            content: createFortunePrompt(userInfo, analysis)
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 1500,
+        top_p: 0.9
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API 오류: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('OpenAI 응답:', data)
+
+    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+      const fortune = parseFortuneResponse(data.choices[0].message.content, userInfo, analysis)
+      console.log('파싱된 운세:', fortune)
+      return fortune
+    } else {
+      throw new Error('OpenAI 응답에 content 필드가 없습니다')
+    }
+  } catch (error) {
+    console.error('OpenAI 운세 생성 오류:', error)
     return generateDefaultFortune(userInfo, analysis)
   }
 }

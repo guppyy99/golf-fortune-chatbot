@@ -206,7 +206,11 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
             {userInfo.name}님의 골프 운세
           </CardTitle>
-          <div className="text-xl text-gray-700 font-semibold mb-4">{fortuneData.fortune?.title}</div>
+          <div className="text-xl text-gray-700 font-semibold mb-4">
+            {typeof fortuneData.fortune?.title === 'string' 
+              ? fortuneData.fortune.title 
+              : fortuneData.fortune?.title?.overallFlow || '올해 골프 운세'}
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -257,9 +261,9 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
                 </div>
                 
                 <div className="space-y-6">
-                  {typeof fortuneData.fortune?.title === 'object' 
+                  {typeof fortuneData.fortune?.title === 'object' && fortuneData.fortune.title !== null
                     ? renderSectionalFortune(fortuneData.fortune.title)
-                    : parseFortuneSections(fortuneData.fortune?.title || '')
+                    : parseFortuneSections(typeof fortuneData.fortune?.title === 'string' ? fortuneData.fortune.title : '')
                   }
                 </div>
               </CardContent>

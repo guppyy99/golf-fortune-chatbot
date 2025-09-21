@@ -10,12 +10,14 @@ export function IntroPage({ onStart }: IntroPageProps) {
   return (
     <div className="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
       <div className="w-full aspect-[4/5] relative overflow-hidden">
-        <Image 
+        <img 
           src="/main-image.jpg" 
           alt="골프 운세 캠페인 메인 이미지"
-          fill
-          className="object-cover"
-          priority
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            console.log('이미지 로드 실패:', e)
+            e.currentTarget.style.display = 'none'
+          }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
       </div>
