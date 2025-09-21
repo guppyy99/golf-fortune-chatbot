@@ -5,7 +5,6 @@ import { UserInfoForm } from "./user-info-form"
 import { FortuneResult } from "./fortune-result"
 import { LoadingScreen } from "./loading-screen"
 import { IntroPage } from "./intro-page"
-import { PhaseIndicator } from "./phase-indicator"
 
 export interface UserInfo {
   name: string
@@ -152,10 +151,6 @@ export function GolfFortuneApp() {
         />
       )}
       
-      {/* 페이즈 인디케이터 */}
-      {currentPhase !== "intro" && (
-        <PhaseIndicator currentPhase={currentPhase} />
-      )}
     </div>
   )
 }

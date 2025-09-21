@@ -356,34 +356,34 @@ function createFortunePrompt(userInfo: UserInfo, analysis: any): string {
 - 행운의 TPO: ${analysis.lucky_tpo || '청색 상의'}
 
 === 요청사항 ===
-골신 할아버지 톤으로 다음 형식에 맞춰 운세를 작성해주세요:
+골신 할아버지 톤으로 다음 형식에 맞춰 매우 상세하고 구체적인 운세를 작성해주세요:
 
 [인사말]
 좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
 생년월일 보니, ${userInfo.birthDate}생… ${userInfo.birthTime || '낮'}에 태어난 ${userInfo.gender}라구? 음, 기운이 뚜렷하네.
 
 :골프를_치는_${userInfo.gender}: 전반 기류
-[올해 골프 운세에 대한 전반적인 이야기 - 3-4문장]
+올해 자네 골프 운세는 ${analysis.element_name || '목의 기운'}의 기운이 강하게 들어와 있네. ${analysis.personality || '활발하고 도전적'}한 성격으로 ${analysis.golf_style || '균형적'}한 플레이가 잘 맞을 걸세. 핸디캡 ${userInfo.handicap}으로는 아직 백돌이지만, 올해는 기초를 다지는 해가 될 것 같네. 특히 ${Array.isArray(analysis.strengths) ? analysis.strengths.join(', ') : analysis.strengths || '드라이버'}에서 큰 성과를 볼 수 있을 게야.
 
 :대체로_맑음: 세부 운세
 
 멘탈 운
-[멘탈 관리에 대한 운세 - 2-3문장]
+골프는 멘탈이 절반이야. 올해 자네는 OB나 해저드에 빠져도, 그 다음 샷에 집중하면 흐름이 다시 살아날 거라네. "다음 샷이 가장 중요한 샷이다" 이 말을 늘 마음에 새겨두게. 특히 ${userInfo.gender === '남성' ? '남성' : '여성'} 골퍼로서의 강인한 멘탈이 올해 큰 힘이 될 걸세.
 
 기술 운
-[기술적 측면의 운세 - 2-3문장]
+${Array.isArray(analysis.strengths) ? analysis.strengths[0] : analysis.strengths || '드라이버'}은 아직 들쑥날쑥하지만, 올해는 숏게임에서 성과가 크게 보일 걸세. 웨지 감각이 빨리 붙고, 퍼트에서도 손맛이 좋아질 테니… 작은 연습도 헛되지 않을 걸세. ${Array.isArray(analysis.weaknesses) ? analysis.weaknesses.join(', ') : analysis.weaknesses || '퍼팅'} 부분만 보완하면 핸디캡이 크게 줄어들 거라네.
 
 체력 운
-[체력과 건강에 대한 운세 - 2-3문장]
+몸의 기운이 순환하는 해라, 무리하게 치는 것보다 라운딩 뒤 회복과 스트레칭이 중요하다네. 부상만 없으면 올해는 계속 즐겁게 칠 수 있을 게야. 특히 ${userInfo.birthTime}에 태어난 기운으로 체력 관리가 더욱 중요하네.
 
 인맥 운
-[인간관계와 동반자에 대한 운세 - 2-3문장]
+동반자 운이 강하게 들어와 있네. 좋은 멘토 같은 골퍼를 만나, 기술도 배우고 골프 철학도 익힐 기회가 있겠구먼. 혼자 하는 골프보다, 같이 하는 골프에서 큰 운이 트일 걸세. ${userInfo.countryClub || '골프장'}에서 좋은 인연을 만날 수 있을 게야.
 
 :골프: 종합
-[올해 전체적인 메시지와 조언 - 3-4문장]
+올해 자네 골프 운세는 말이야, "한 방에 확 튀어 오르는 해"가 아니라, 땅을 다지고 천천히 기초를 세우는 해라네. 아직은 백돌이지만, 폼과 루틴만 착실히 챙기면 성장 속도가 남들보다 빠를 게야. ${analysis.element || '木'} 오행의 기운이 뒷받침해주니, 꾸준함이 답이라네.
 
 [마무리 한줄]
-허허, 그러니 너무 조급해 말고… [간단한 조언 한 문장]
+허허, 그러니 너무 조급해 말고… 올해는 ${Array.isArray(analysis.strengths) ? analysis.strengths[0] : analysis.strengths || '기본기'}와 멘탈, 그리고 기본기만 믿고 가면, 자네 골프 인생에 큰 길이 열릴 걸세. ${userInfo.name}아, 오늘도 즐거운 라운드 되게!
 
 === 작성 규칙 ===
 - 할아버지 톤으로 "자네", "~라네", "~구먼", "~걸세" 사용
@@ -423,16 +423,19 @@ function parseFortuneResponse(response: string, userInfo: UserInfo, analysis: an
     const luckyItem = getLuckyItemFromElement(analysis?.element)
     
     return {
-      title: response, // 전체 골신 할아버지 응답을 title로 사용
+      title: {
+        greeting: greetingMatch ? greetingMatch[0].trim() : "좋네… 자네의 운세를 보자고 했지?",
+        overallFlow: generalMatch ? generalMatch[1].trim() : "올해는 기초를 다지는 해가 될 것 같네요.",
+        mentalFortune: mentalMatch ? mentalMatch[1].trim() : "멘탈이 절반이라네. 긍정적인 마음가짐을 유지하세요.",
+        skillFortune: skillMatch ? skillMatch[1].trim() : "기술적 측면에서 꾸준한 연습이 필요하겠네요.",
+        physicalFortune: healthMatch ? healthMatch[1].trim() : "체력 관리가 중요한 한 해가 될 것 같습니다.",
+        networkFortune: networkMatch ? networkMatch[1].trim() : "좋은 동반자와 함께하는 골프가 운을 높일 거라네.",
+        overallMessage: summaryMatch ? summaryMatch[1].trim() : "종합적으로 보면 좋은 한 해가 될 것 같네요.",
+        finalAdvice: finalMatch ? finalMatch[1].trim() : "오늘도 즐거운 라운드 되세요."
+      },
       luckyClub: luckyClub,
       luckyHole: luckyHole,
-      luckyItem: luckyItem,
-      roundFortune: generalMatch ? generalMatch[1].trim() : "올해는 기초를 다지는 해가 될 것 같네요.",
-      bettingFortune: mentalMatch ? mentalMatch[1].trim() : "멘탈이 절반이라네. 긍정적인 마음가짐을 유지하세요.",
-      strategyFortune: skillMatch ? skillMatch[1].trim() : "기술적 측면에서 꾸준한 연습이 필요하겠네요.",
-      scoreFortune: healthMatch ? healthMatch[1].trim() : "체력 관리가 중요한 한 해가 될 것 같습니다.",
-      courseFortune: networkMatch ? networkMatch[1].trim() : "좋은 동반자와 함께하는 골프가 운을 높일 거라네.",
-      quote: finalMatch ? finalMatch[1].trim() : "오늘도 즐거운 라운드 되세요."
+      luckyItem: luckyItem
     }
   } catch (error) {
     console.error('응답 파싱 오류:', error)
@@ -527,18 +530,19 @@ function getLuckyItemFromElement(element: string) {
 function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
   if (!userInfo || !analysis) {
     return {
-      title: "골신 할아버지가 운세를 준비하고 있습니다...",
+      title: {
+        greeting: "골신 할아버지가 운세를 준비하고 있습니다...",
+        overallFlow: "올해는 기초를 다지는 해가 될 것 같네요.",
+        mentalFortune: "멘탈이 절반이라네. 긍정적인 마음가짐을 유지하세요.",
+        skillFortune: "기술적 측면에서 꾸준한 연습이 필요하겠네요.",
+        physicalFortune: "체력 관리가 중요한 한 해가 될 것 같습니다.",
+        networkFortune: "좋은 동반자와 함께하는 골프가 운을 높일 거라네.",
+        overallMessage: "종합적으로 보면 좋은 한 해가 될 것 같네요.",
+        finalAdvice: "오늘도 즐거운 라운드 되세요."
+      },
       luckyClub: "XXIO 13 Irons",
-      luckyBall: "타이틀리스트 Pro V1",
       luckyHole: "5번홀",
-      luckyItem: "거리측정기",
-      luckyTPO: "청색 상의, 하얀색 하의",
-      roundFortune: "오늘은 차분하게 플레이하는 것이 중요합니다.",
-      bettingFortune: "작은 내기만 하세요.",
-      courseFortune: "평지 코스가 좋겠습니다.",
-      scoreFortune: "평소보다 2-3타 높게 잡으세요.",
-      strategyFortune: "안전한 플레이를 선택하세요.",
-      quote: "골프는 마음의 게임입니다."
+      luckyItem: "거리측정기"
     }
   }
 
@@ -709,13 +713,7 @@ ${level} 레벨에서 안정적으로 실력을 쌓아가면, 언젠가는 큰 �
     title: sectionalFortune,
     luckyClub: getLuckyClub(),
     luckyHole: getLuckyHole(),
-    luckyItem: getLuckyItemFromElement(element),
-    roundFortune: `${personality}한 성격으로 ${golfStyle}한 플레이가 좋겠습니다.`,
-    bettingFortune: `${level} 레벨에 맞는 작은 내기만 하세요. ${strengths[0]}이 강점이니 이를 활용하세요.`,
-    courseFortune: `${element} 오행의 기운에 맞는 코스를 선택하세요. ${userInfo.countryClub || '평지 코스'}가 좋겠습니다.`,
-    scoreFortune: `${level} 레벨에 맞는 목표를 설정하세요. ${weaknesses[0]}을 보완하는 연습이 필요합니다.`,
-    strategyFortune: `${strengths[0]}을 활용하고 ${weaknesses[0]}을 보완하는 전략으로 플레이하세요.`,
-    quote: `${personality}한 마음으로 골프를 즐기세요. ${elementName}이 당신을 응원합니다.`
+    luckyItem: getLuckyItemFromElement(element)
   }
 }
 
@@ -796,7 +794,7 @@ function generateCSVData(userInfo: UserInfo, analysis: any, fortune: any): strin
     '이름', '휴대폰번호', '생년월일', '출생시간', '성별', '핸디캡',
     '방문CC', '아이언', '드라이버', '웨지', '퍼터', '볼',
     '사주요약', '오행', '성격', '골프스타일', '행운요소', '약점',
-    '운세제목', '행운클럽', '행운볼', '행운홀', '행운아이템', '행운TPO'
+    '운세제목', '행운클럽', '행운홀', '행운아이템'
   ]
   
   const values = [
@@ -818,12 +816,10 @@ function generateCSVData(userInfo: UserInfo, analysis: any, fortune: any): strin
     analysis.golfStyle || '',
     Array.isArray(analysis.luckyElements) ? analysis.luckyElements.join(', ') : '',
     Array.isArray(analysis.weakPoints) ? analysis.weakPoints.join(', ') : '',
-    fortune.title || '',
+    typeof fortune.title === 'object' ? JSON.stringify(fortune.title) : (fortune.title || ''),
     fortune.luckyClub || '',
-    fortune.luckyBall || '',
     fortune.luckyHole || '',
-    fortune.luckyItem || '',
-    fortune.luckyTPO || ''
+    fortune.luckyItem || ''
   ]
   
   return headers.join(',') + '\n' + values.map(v => `"${v}"`).join(',') + '\n'

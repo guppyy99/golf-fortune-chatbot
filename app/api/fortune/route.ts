@@ -79,46 +79,50 @@ function buildUserPrompt(p: FortuneInput): string {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  const body = (await req.json()) as FortuneInput;
+  try {
+    const body = (await req.json()) as FortuneInput;
 
-  const response = await client.responses.create({
-    model: 'gpt-4o-mini',
-    input: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: buildUserPrompt(body) },
-    ],
-    stream: true,
-  });
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: buildUserPrompt(body) },
+      ],
+      stream: true,
+    });
 
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const encoder = new TextEncoder();
-      try {
-        for await (const event of response as any) {
-          if (event.type === 'response.output_text.delta') {
-            controller.enqueue(encoder.encode(event.delta as string));
-          } else if (event.type === 'response.error') {
-            controller.enqueue(
-              encoder.encode(`\n\n[에러] ${event.error?.message ?? 'unknown error'}`)
-            );
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        try {
+          for await (const chunk of response) {
+            const text = chunk.choices[0]?.delta?.content || '';
+            if (text) {
+              controller.enqueue(encoder.encode(text));
+            }
           }
+        } catch (err: any) {
+          controller.enqueue(
+            encoder.encode(`\n\n[에러] ${err?.message ?? 'unknown error'}`)
+          );
+        } finally {
+          controller.close();
         }
-      } catch (err: any) {
-        controller.enqueue(
-          new TextEncoder().encode(`\n\n[에러] ${err?.message ?? 'unknown error'}`)
-        );
-      } finally {
-        controller.close();
-      }
-    },
-  });
+      },
+    });
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
-  });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+      },
+    });
+  } catch (error: any) {
+    return new Response(`에러 발생: ${error.message}`, {
+      status: 500,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
 }
 
 

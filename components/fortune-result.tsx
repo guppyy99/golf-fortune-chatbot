@@ -24,6 +24,26 @@ function renderSectionalFortune(fortuneData: any) {
     if (!content) return null
 
     const sectionConfig = getSectionConfig(section.type)
+    
+    // 인사말 섹션은 가운데 정렬로 특별 처리
+    if (section.type === 'greeting') {
+      return (
+        <div key={index} className={`p-8 rounded-xl border ${sectionConfig.bg} ${sectionConfig.border}`}>
+          <div className="text-center">
+            <div className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center ${sectionConfig.iconBg}`}>
+              <span className="text-white text-xl">{sectionConfig.icon}</span>
+            </div>
+            <h3 className={`text-2xl font-bold mb-6 ${sectionConfig.titleColor}`}>
+              {sectionConfig.title}
+            </h3>
+            <div className={`text-lg leading-relaxed ${sectionConfig.textColor} whitespace-pre-wrap font-medium text-center`}>
+              {content}
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
     return (
       <div key={index} className={`p-6 rounded-xl border ${sectionConfig.bg} ${sectionConfig.border}`}>
         <div className="flex items-center gap-3 mb-4">
@@ -214,6 +234,28 @@ export function FortuneResult({ userInfo, fortuneData, onRestart }: FortuneResul
         </CardHeader>
 
         <CardContent>
+          {/* 사용자 정보 섹션 */}
+          <div className="text-center mb-8 p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-gray-100">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <div className="text-gray-500 mb-1">이름</div>
+                <div className="font-semibold text-gray-800">{userInfo.name}</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">생년월일</div>
+                <div className="font-semibold text-gray-800">{userInfo.birthDate}</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">생시</div>
+                <div className="font-semibold text-gray-800">{userInfo.birthTime}</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">핸디캡</div>
+                <div className="font-semibold text-gray-800">{userInfo.handicap}</div>
+              </div>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100">
               <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-400 rounded-lg flex items-center justify-center">

@@ -249,37 +249,55 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
 
                   {!noBirthTime && (
                     <div className="space-y-4">
-                      <Label className="text-sm text-gray-500">출생시간을 선택해주세요</Label>
+                      <Label className="text-sm text-gray-500">출생시간을 입력해주세요</Label>
                       
-                      {/* 시간대 토글 */}
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { label: "새벽", time: "새벽 (00:00-06:00)", value: "새벽" },
-                          { label: "아침", time: "아침 (06:00-12:00)", value: "아침" },
-                          { label: "오후", time: "오후 (12:00-18:00)", value: "오후" },
-                          { label: "저녁", time: "저녁 (18:00-24:00)", value: "저녁" }
-                        ].map((timeSlot) => (
-                          <Button
-                            key={timeSlot.value}
-                            variant={formData.birthTime === timeSlot.value ? "default" : "outline"}
-                            onClick={() => updateFormData("birthTime", timeSlot.value)}
-                            className={`h-12 text-sm font-medium ${
-                              formData.birthTime === timeSlot.value
-                                ? "bg-blue-500 text-white hover:bg-blue-600"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-300"
-                            }`}
-                          >
-                            {timeSlot.label}
-                          </Button>
-                        ))}
+                      {/* 수동 입력 옵션 */}
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-gray-400 mb-1 block">정확한 시간 (예: 14:30)</Label>
+                          <Input
+                            type="time"
+                            value={formData.birthTime?.includes(':') ? formData.birthTime : ''}
+                            onChange={(e) => updateFormData("birthTime", e.target.value)}
+                            className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-0 py-3 text-base focus:border-blue-600 focus:ring-0 placeholder:text-gray-400 w-full"
+                          />
+                        </div>
+                        
+                        <div className="text-center text-sm text-gray-500">또는</div>
+                        
+                        {/* 시간대 토글 */}
+                        <div>
+                          <Label className="text-xs text-gray-400 mb-2 block">대략적인 시간대</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { label: "새벽", time: "새벽 (00:00-06:00)", value: "새벽" },
+                              { label: "아침", time: "아침 (06:00-12:00)", value: "아침" },
+                              { label: "오후", time: "오후 (12:00-18:00)", value: "오후" },
+                              { label: "저녁", time: "저녁 (18:00-24:00)", value: "저녁" }
+                            ].map((timeSlot) => (
+                              <Button
+                                key={timeSlot.value}
+                                variant={formData.birthTime === timeSlot.value ? "default" : "outline"}
+                                onClick={() => updateFormData("birthTime", timeSlot.value)}
+                                className={`h-10 text-sm font-medium ${
+                                  formData.birthTime === timeSlot.value
+                                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-300"
+                                }`}
+                              >
+                                {timeSlot.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                       
-                      {/* 선택된 시간대 표시 */}
+                      {/* 선택된 시간 표시 */}
                       {formData.birthTime && (
                         <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <span className="text-sm text-blue-700 font-medium">
-                            선택: {formData.birthTime} 시간대
-                          </span>
+                          <p className="text-sm text-blue-700 font-medium">
+                            입력된 시간: {formData.birthTime}
+                          </p>
                         </div>
                       )}
                     </div>
