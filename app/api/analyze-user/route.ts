@@ -232,9 +232,15 @@ async function computeSaju(userInfo: UserInfo) {
 
 async function generateFortuneWithOllama(userInfo: UserInfo, analysis: any) {
   try {
+    // Vercel 환경에서는 OLLAMA 사용 불가
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      console.log('Vercel 환경에서 기본 운세 생성 사용')
+      return generateDefaultFortune(userInfo, analysis)
+    }
+    
     console.log('OLLAMA 모델 호출 시작...')
     
-    // OLLAMA API 호출
+    // OLLAMA API 호출 (로컬 환경에서만)
     const response = await fetch('http://localhost:11434/api/generate', {
       method: 'POST',
       headers: {
@@ -492,10 +498,10 @@ function getLuckyItemFromElement(element: string) {
 function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
   if (!userInfo || !analysis) {
     return {
-      title: "오늘은 신중하게 플레이하세요",
-      luckyClub: "퍼터",
-      luckyBall: "타이틀리스트",
-      luckyHole: "9번홀",
+      title: "골신 할아버지가 운세를 준비하고 있습니다...",
+      luckyClub: "XXIO 13 Irons",
+      luckyBall: "타이틀리스트 Pro V1",
+      luckyHole: "5번홀",
       luckyItem: "거리측정기",
       luckyTPO: "청색 상의, 하얀색 하의",
       roundFortune: "오늘은 차분하게 플레이하는 것이 중요합니다.",
@@ -550,20 +556,48 @@ function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
   const golfStyle = analysis?.golf_style || '균형적'
   const strengths = analysis?.strengths || ['드라이버']
   const weaknesses = analysis?.weaknesses || ['퍼팅']
+  const element = analysis?.element || '木'
+  const elementName = analysis?.element_name || '목의 기운'
+  
+  // 골신 할아버지 스타일 기본 운세 생성
+  const golfGodFortune = `좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
+생년월일 보니, ${userInfo.birthDate}생… ${userInfo.gender}라구? 음, 기운이 뚜렷하네.
+
+:골프를_치는_${userInfo.gender === '남성' ? '남성' : '여성'}: 전반 기류
+올해 자네 골프 운세는 ${elementName}의 기운이 강하게 들어와 있네. ${personality}한 성격으로 ${golfStyle}한 플레이가 잘 맞을 걸세.
+
+:대체로_맑음: 세부 운세
+
+멘탈 운
+골프는 멘탈이 절반이야. 올해 자네는 ${strengths[0]}에서 자신감을 찾으면 전체적인 게임이 좋아질 거라네.
+
+기술 운
+${strengths[0]}이 강점이니 이를 활용하고, ${weaknesses[0]}을 보완하는 연습을 꾸준히 하면 실력 향상이 있을 걸세.
+
+체력 운
+몸의 기운이 순환하는 해라, 무리하게 치는 것보다 라운딩 뒤 회복과 스트레칭이 중요하다네.
+
+인맥 운
+동반자 운이 강하게 들어와 있네. 좋은 멘토 같은 골퍼를 만나, 기술도 배우고 골프 철학도 익힐 기회가 있겠구먼.
+
+:골프: 종합
+올해 자네에게 내려온 메시지는 분명하다네. "${level} 레벨에서 꾸준한 성장을 하는 해" 특히 가을 무렵엔 운세가 강하게 들어오니, 그때 라운딩에서 좋은 성과를 낼 수 있을 게야.
+
+허허, 그러니 너무 조급해 말고… 올해는 ${strengths[0]}과 멘탈, 그리고 기본기만 믿고 가면, 자네 골프 인생에 큰 길이 열릴 걸세.`
   
   return {
-    title: `${userInfo.name}님의 오늘 골프 운세`,
+    title: golfGodFortune,
     luckyClub: getLuckyClub(),
     luckyBall: getLuckyBall(),
     luckyHole: getLuckyHole(),
-    luckyItem: "거리측정기",
+    luckyItem: getLuckyItemFromElement(element),
     luckyTPO: getLuckyTPO(),
     roundFortune: `${personality}한 성격으로 ${golfStyle}한 플레이가 좋겠습니다.`,
     bettingFortune: `${level} 레벨에 맞는 작은 내기만 하세요. ${strengths[0]}이 강점이니 이를 활용하세요.`,
-    courseFortune: `${analysis?.element || '목'} 오행의 기운에 맞는 코스를 선택하세요. ${userInfo.countryClub || '평지 코스'}가 좋겠습니다.`,
+    courseFortune: `${element} 오행의 기운에 맞는 코스를 선택하세요. ${userInfo.countryClub || '평지 코스'}가 좋겠습니다.`,
     scoreFortune: `${level} 레벨에 맞는 목표를 설정하세요. ${weaknesses[0]}을 보완하는 연습이 필요합니다.`,
     strategyFortune: `${strengths[0]}을 활용하고 ${weaknesses[0]}을 보완하는 전략으로 플레이하세요.`,
-    quote: `${personality}한 마음으로 골프를 즐기세요. ${analysis?.element_name || '목의 기운'}이 당신을 응원합니다.`
+    quote: `${personality}한 마음으로 골프를 즐기세요. ${elementName}이 당신을 응원합니다.`
   }
 }
 
