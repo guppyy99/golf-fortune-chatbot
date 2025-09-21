@@ -232,128 +232,204 @@ async function computeSaju(userInfo: UserInfo) {
 
 async function generateFortuneWithOllama(userInfo: UserInfo, analysis: any) {
   try {
-    // 기본 운세 생성 (OLLAMA 대신)
-    return generateDefaultFortune(userInfo, analysis)
+    console.log('OLLAMA 모델 호출 시작...')
+    
+    // OLLAMA API 호출
+    const response = await fetch('http://localhost:11434/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'golf-fortune',
+        prompt: createFortunePrompt(userInfo, analysis),
+        stream: false
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`OLLAMA API 오류: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('OLLAMA 응답:', data.response)
+    
+    // 응답 파싱
+    const fortune = parseFortuneResponse(data.response, userInfo, analysis)
+    console.log('파싱된 운세:', fortune)
+    
+    return fortune
     
   } catch (error) {
-    console.error('운세 생성 오류:', error)
+    console.error('OLLAMA 운세 생성 오류:', error)
     // 오류 시 기본 운세 반환
     return generateDefaultFortune(userInfo, analysis)
   }
 }
 
 function createFortunePrompt(userInfo: UserInfo, analysis: any): string {
-  // 핸디캡에 따른 레벨 분류
-  const getLevel = (handicap: number) => {
-    if (handicap < 10) return "싱글"
-    if (handicap < 20) return "중급"
-    return "초심자"
-  }
-
-  const level = getLevel(userInfo.handicap)
-  
-  return `당신은 전문 골프 운세사입니다. 다음 사용자 정보와 사주 분석을 바탕으로 개인화된 골프 운세를 작성해주세요.
+  return `당신은 골프의 신 '골신' 할아버지입니다. 100년 넘게 골프를 지켜본 신선으로서, 사용자의 운세를 봐주세요.
 
 === 사용자 정보 ===
 - 이름: ${userInfo.name}
 - 생년월일: ${userInfo.birthDate}
 - 성별: ${userInfo.gender}
-- 핸디캡: ${userInfo.handicap} (${level})
-- 방문하는 CC: ${userInfo.countryClub || '미정'}
-- 아이언: ${userInfo.ironBrand || '미정'}
-- 드라이버: ${userInfo.driverBrand || '미정'}
-- 웨지: ${userInfo.wedgeBrand || '미정'}
-- 퍼터: ${userInfo.putterBrand || '미정'}
-- 볼: ${userInfo.ballBrand || '미정'}
+- 핸디캡: ${userInfo.handicap}
+- 방문 예정 CC: ${userInfo.get?.('countryClub') || '미정'}
 
 === 사주 분석 결과 ===
 - 사주: ${analysis.saju_summary || '기본 사주'}
-- 오행: ${analysis.element || '木'}
+- 오행: ${analysis.element || '木'} (${analysis.element_name || '목'})
 - 성격: ${analysis.personality || '활발하고 도전적'}
 - 골프 스타일: ${analysis.golf_style || '균형적'}
 - 강점: ${Array.isArray(analysis.strengths) ? analysis.strengths.join(', ') : analysis.strengths || '드라이버'}
 - 약점: ${Array.isArray(analysis.weaknesses) ? analysis.weaknesses.join(', ') : analysis.weaknesses || '퍼팅'}
 - 행운 요소: ${Array.isArray(analysis.lucky_elements) ? analysis.lucky_elements.join(', ') : analysis.lucky_elements || '파랑'}
-- 행운 숫자: ${Array.isArray(analysis.lucky_numbers) ? analysis.lucky_numbers.join(', ') : analysis.lucky_numbers || '3, 8'}
+- 행운의 클럽: ${analysis.lucky_club || '아이언'}
+- 행운의 볼: ${analysis.lucky_ball || '타이틀리스트 Pro V1'}
+- 행운의 TPO: ${analysis.lucky_tpo || '청색 상의'}
 
 === 요청사항 ===
-위 정보를 바탕으로 개인화된 골프 운세를 다음 형식으로 작성해주세요:
+골신 할아버지 톤으로 다음 형식에 맞춰 운세를 작성해주세요:
 
-1) 내기 운
-[사주와 성격을 반영한 내기 운세 - 구체적이고 개인화된 내용]
+[인사말]
+좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
+생년월일 보니, ${userInfo.birthDate}생… ${userInfo.birthTime || '낮'}에 태어난 ${userInfo.gender}라구? 음, 기운이 뚜렷하네.
 
-2) 골프장 운  
-[방문하는 CC와 오행을 연관한 코스 운세 - 구체적인 홀 번호나 코스 특징 포함]
+:골프를_치는_${userInfo.gender}: 전반 기류
+[올해 골프 운세에 대한 전반적인 이야기 - 3-4문장]
 
-3) 스코어 운
-[핸디캡과 강약점을 고려한 스코어 예측 - 구체적인 타수나 개선 방안 포함]
+:대체로_맑음: 세부 운세
 
-4) 공략 운
-[약점 보완과 강점 활용을 위한 전략 - 구체적인 클럽 선택이나 플레이 방법 제시]
+멘탈 운
+[멘탈 관리에 대한 운세 - 2-3문장]
 
-5) 마무리 한줄
-[사주와 골프 스타일을 반영한 개인화된 명언 - 격려와 조언이 담긴 한 줄]
+기술 운
+[기술적 측면의 운세 - 2-3문장]
 
-중요: 각 섹션은 구체적이고 개인화된 내용으로 작성하고, 사주 분석 결과를 반드시 반영해주세요.`
+체력 운
+[체력과 건강에 대한 운세 - 2-3문장]
+
+인맥 운
+[인간관계와 동반자에 대한 운세 - 2-3문장]
+
+:골프: 종합
+[올해 전체적인 메시지와 조언 - 3-4문장]
+
+[마무리 한줄]
+허허, 그러니 너무 조급해 말고… [간단한 조언 한 문장]
+
+=== 작성 규칙 ===
+- 할아버지 톤으로 "자네", "~라네", "~구먼", "~걸세" 사용
+- 사주 정보를 자연스럽게 언급하면서 운세 설명
+- 현실적이면서도 희망적인 조언 제공
+- 과도한 확정 표현은 피하고, "~일 걸세", "~할 거라네" 등 사용
+- 이모지는 적절히 사용하되 과하지 않게`
 }
 
-function parseFortuneResponse(response: string) {
+function parseFortuneResponse(response: string, userInfo: UserInfo, analysis: any) {
   try {
     console.log('OLLAMA 응답:', response)
     
-    // 각 섹션을 정확히 추출 (더 유연한 패턴 매칭)
-    const bettingMatch = response.match(/1\)\s*내기\s*운\s*([\s\S]*?)(?=2\)|$)/i) || 
-                        response.match(/내기\s*운\s*([\s\S]*?)(?=골프장|스코어|공략|마무리|$)/i)
-    const courseMatch = response.match(/2\)\s*골프장\s*운\s*([\s\S]*?)(?=3\)|$)/i) || 
-                        response.match(/골프장\s*운\s*([\s\S]*?)(?=스코어|공략|마무리|$)/i)
-    const scoreMatch = response.match(/3\)\s*스코어\s*운\s*([\s\S]*?)(?=4\)|$)/i) || 
-                       response.match(/스코어\s*운\s*([\s\S]*?)(?=공략|마무리|$)/i)
-    const strategyMatch = response.match(/4\)\s*공략\s*운\s*([\s\S]*?)(?=5\)|$)/i) || 
-                          response.match(/공략\s*운\s*([\s\S]*?)(?=마무리|$)/i)
-    const quoteMatch = response.match(/5\)\s*마무리\s*한줄\s*([\s\S]*?)$/i) || 
-                       response.match(/마무리\s*한줄\s*([\s\S]*?)$/i)
+    // 골신 할아버지 스타일 응답 파싱
+    const greetingMatch = response.match(/좋네…[\s\S]*?기운이 뚜렷하네\./i)
+    const generalMatch = response.match(/:골프를_치는_[^:]+:\s*전반\s*기류\s*([\s\S]*?)(?=:대체로_맑음:|$)/i)
+    const mentalMatch = response.match(/멘탈\s*운\s*([\s\S]*?)(?=기술\s*운|$)/i)
+    const skillMatch = response.match(/기술\s*운\s*([\s\S]*?)(?=체력\s*운|$)/i)
+    const healthMatch = response.match(/체력\s*운\s*([\s\S]*?)(?=인맥\s*운|$)/i)
+    const networkMatch = response.match(/인맥\s*운\s*([\s\S]*?)(?=:골프:\s*종합|$)/i)
+    const summaryMatch = response.match(/:골프:\s*종합\s*([\s\S]*?)(?=\[마무리|$)/i)
+    const finalMatch = response.match(/허허, 그러니 너무 조급해 말고…\s*([\s\S]*?)$/i)
     
-    console.log('섹션 매칭 결과:')
-    console.log('내기 운:', bettingMatch ? '매칭됨' : '매칭 안됨')
-    console.log('골프장 운:', courseMatch ? '매칭됨' : '매칭 안됨')
-    console.log('스코어 운:', scoreMatch ? '매칭됨' : '매칭 안됨')
-    console.log('공략 운:', strategyMatch ? '매칭됨' : '매칭 안됨')
-    console.log('마무리 한줄:', quoteMatch ? '매칭됨' : '매칭 안됨')
+    console.log('골신 응답 파싱 결과:')
+    console.log('인사말:', greetingMatch ? '매칭됨' : '매칭 안됨')
+    console.log('전반 기류:', generalMatch ? '매칭됨' : '매칭 안됨')
+    console.log('멘탈 운:', mentalMatch ? '매칭됨' : '매칭 안됨')
+    console.log('기술 운:', skillMatch ? '매칭됨' : '매칭 안됨')
+    console.log('체력 운:', healthMatch ? '매칭됨' : '매칭 안됨')
+    console.log('인맥 운:', networkMatch ? '매칭됨' : '매칭 안됨')
+    console.log('종합:', summaryMatch ? '매칭됨' : '매칭 안됨')
+    console.log('마무리:', finalMatch ? '매칭됨' : '매칭 안됨')
     
-    // 행운의 클럽과 볼을 사주 분석에서 추출
-    const getLuckyClub = (analysis: any) => {
-      if (analysis?.strengths?.includes('드라이버')) return '드라이버'
-      if (analysis?.strengths?.includes('아이언')) return '아이언'
-      if (analysis?.strengths?.includes('퍼팅')) return '퍼터'
-      return '아이언'
-    }
-    
-    const getLuckyBall = (analysis: any) => {
-      const colors = analysis?.lucky_elements || ['파랑']
-      if (colors.includes('파랑')) return '타이틀리스트 Pro V1'
-      if (colors.includes('빨강')) return '테일러메이드 TP5'
-      if (colors.includes('초록')) return '브리지스톤 B XS'
-      return '타이틀리스트 Pro V1'
-    }
+    // 동적 행운 아이템 생성
+    const luckyClub = analysis?.lucky_club || getLuckyClubFromStrengths(analysis?.strengths)
+    const luckyBall = analysis?.lucky_ball || getLuckyBallFromColors(analysis?.lucky_elements)
+    const luckyTPO = analysis?.lucky_tpo || getLuckyTPOFromColors(analysis?.lucky_elements)
+    const luckyHole = getLuckyHoleFromNumbers(analysis?.lucky_numbers)
+    const luckyItem = getLuckyItemFromElement(analysis?.element)
     
     return {
-      title: "오늘의 골프 운세",
-      luckyClub: getLuckyClub(null),
-      luckyBall: getLuckyBall(null), 
-      luckyHole: `${Math.floor(Math.random() * 18) + 1}번홀`,
-      luckyItem: "거리측정기",
-      luckyTPO: "청색 상의, 하얀색 하의",
-      roundFortune: "오늘의 라운드를 위한 조언입니다.",
-      bettingFortune: bettingMatch ? bettingMatch[1].trim().replace(/^[-•]\s*/, '') : "오늘은 작은 내기만 하세요. 사주의 기운이 안정적이어서 신중한 판단이 필요합니다.",
-      courseFortune: courseMatch ? courseMatch[1].trim().replace(/^[-•]\s*/, '') : "평지 코스가 좋겠습니다. 사주의 오행과 조화를 이루는 코스를 선택하세요.",
-      scoreFortune: scoreMatch ? scoreMatch[1].trim().replace(/^[-•]\s*/, '') : "평소보다 2-3타 높게 잡으세요. 사주 분석에 따르면 오늘은 안정적인 플레이가 중요합니다.",
-      strategyFortune: strategyMatch ? strategyMatch[1].trim().replace(/^[-•]\s*/, '') : "안전한 플레이를 선택하세요. 사주의 강점을 활용하고 약점을 보완하는 전략이 필요합니다.",
-      quote: quoteMatch ? quoteMatch[1].trim().replace(/^[-•]\s*/, '') : "오늘도 즐거운 라운드 되세요. 사주가 당신의 골프를 응원합니다."
+      title: response, // 전체 골신 할아버지 응답을 title로 사용
+      luckyClub: luckyClub,
+      luckyBall: luckyBall,
+      luckyHole: luckyHole,
+      luckyItem: luckyItem,
+      luckyTPO: luckyTPO,
+      roundFortune: generalMatch ? generalMatch[1].trim() : "올해는 기초를 다지는 해가 될 것 같네요.",
+      bettingFortune: mentalMatch ? mentalMatch[1].trim() : "멘탈이 절반이라네. 긍정적인 마음가짐을 유지하세요.",
+      strategyFortune: skillMatch ? skillMatch[1].trim() : "기술적 측면에서 꾸준한 연습이 필요하겠네요.",
+      scoreFortune: healthMatch ? healthMatch[1].trim() : "체력 관리가 중요한 한 해가 될 것 같습니다.",
+      courseFortune: networkMatch ? networkMatch[1].trim() : "좋은 동반자와 함께하는 골프가 운을 높일 거라네.",
+      quote: finalMatch ? finalMatch[1].trim() : "오늘도 즐거운 라운드 되세요."
     }
   } catch (error) {
     console.error('응답 파싱 오류:', error)
-    return generateDefaultFortune(null, null)
+    return generateDefaultFortune(userInfo, analysis)
   }
+}
+
+// 동적 행운 아이템 생성 함수들
+function getLuckyClubFromStrengths(strengths: string[]) {
+  if (!Array.isArray(strengths)) return '아이언'
+  if (strengths.includes('드라이버')) return '드라이버'
+  if (strengths.includes('아이언')) return '아이언'
+  if (strengths.includes('퍼팅')) return '퍼터'
+  if (strengths.includes('웨지')) return '웨지'
+  return '아이언'
+}
+
+function getLuckyBallFromColors(colors: string[]) {
+  if (!Array.isArray(colors)) return '타이틀리스트 Pro V1'
+  const color = colors[0] || '파랑'
+  const ballMap = {
+    '파랑': '타이틀리스트 Pro V1',
+    '빨강': '테일러메이드 TP5',
+    '초록': '브리지스톤 B XS',
+    '노랑': '콜웨이 ERC Soft',
+    '검정': '윌슨 Staff Model',
+    '흰색': '스릭슨 Z-STAR'
+  }
+  return ballMap[color] || '타이틀리스트 Pro V1'
+}
+
+function getLuckyTPOFromColors(colors: string[]) {
+  if (!Array.isArray(colors)) return '청색 상의, 하얀색 하의'
+  const color = colors[0] || '파랑'
+  const tpoMap = {
+    '파랑': '청색 상의, 하얀색 하의',
+    '빨강': '빨간색 상의, 검은색 하의',
+    '초록': '초록색 상의, 하얀색 하의',
+    '노랑': '노란색 상의, 검은색 하의',
+    '검정': '검은색 상의, 하얀색 하의',
+    '흰색': '하얀색 상의, 검은색 하의'
+  }
+  return tpoMap[color] || '청색 상의, 하얀색 하의'
+}
+
+function getLuckyHoleFromNumbers(numbers: number[]) {
+  if (!Array.isArray(numbers) || numbers.length === 0) return '5번홀'
+  return `${numbers[0]}번홀`
+}
+
+function getLuckyItemFromElement(element: string) {
+  const itemMap = {
+    '木': '거리측정기',
+    '火': '골프 모자',
+    '土': '골프 장갑',
+    '金': '골프 시계',
+    '水': '골프 우산'
+  }
+  return itemMap[element] || '거리측정기'
 }
 
 function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {

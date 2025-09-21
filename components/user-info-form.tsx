@@ -242,15 +242,15 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
           </p>
         </div>
 
-        <div className="flex-1 px-6 py-8 flex flex-col justify-center">
+        <div className={`flex-1 px-6 py-8 flex flex-col ${step === 7 ? 'justify-start' : 'justify-center'} ${step === 7 ? 'overflow-y-auto' : ''}`}>
           <div className="w-full">
-            <div className="h-32 mb-8">
+            <div className={`${step === 7 ? 'h-16 mb-4' : 'h-32 mb-8'}`}>
               <h2 className="text-2xl font-bold text-gray-900 leading-tight whitespace-pre-line">
                 {stepContent.title}
               </h2>
             </div>
 
-            <div className="h-40">
+            <div className={`${step === 7 ? 'min-h-0' : 'h-40'}`}>
               {step === 1 && (
                 <div className="transition-all duration-300 ease-in-out">
                   <Label className="text-sm text-gray-500 mb-2 block">{stepContent.subtitle}</Label>
@@ -348,48 +348,69 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
                 <div className="transition-all duration-300 ease-in-out">
                   <Label className="text-sm text-gray-500 mb-4 block">{stepContent.subtitle}</Label>
                   
-                  {/* 토글 버튼 */}
-                  <div className="flex items-center justify-center mb-6">
-                    <div className="bg-gray-100 rounded-full p-1 flex">
-                      <button
+                  {/* 간단한 시간 선택 */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <Button
+                        variant={!noBirthTime ? "default" : "outline"}
                         onClick={() => setNoBirthTime(false)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                          !noBirthTime 
-                            ? "bg-white text-gray-900 shadow-sm" 
-                            : "text-gray-500 hover:text-gray-700"
+                        className={`h-12 text-base font-medium ${
+                          !noBirthTime
+                            ? "bg-black text-white hover:bg-gray-800"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
                         }`}
                       >
                         알고 있어요
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant={noBirthTime ? "default" : "outline"}
                         onClick={() => setNoBirthTime(true)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                          noBirthTime 
-                            ? "bg-white text-gray-900 shadow-sm" 
-                            : "text-gray-500 hover:text-gray-700"
+                        className={`h-12 text-base font-medium ${
+                          noBirthTime
+                            ? "bg-black text-white hover:bg-gray-800"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
                         }`}
                       >
                         모르겠어요
-                      </button>
+                      </Button>
                     </div>
-                  </div>
 
-                  {/* 시간 입력 또는 안내 메시지 */}
-                  {!noBirthTime ? (
-                    <div className="space-y-4">
-                      <TimePicker 
-                        value={formData.birthTime || ""}
-                        onChange={(time) => updateFormData("birthTime", time)}
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span className="text-2xl">❓</span>
+                    {!noBirthTime && (
+                      <div className="space-y-3">
+                        <Label className="text-sm text-gray-500">출생시간을 선택해주세요</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            "새벽 (00:00-06:00)",
+                            "아침 (06:00-12:00)", 
+                            "오후 (12:00-18:00)",
+                            "저녁 (18:00-24:00)"
+                          ].map((timeSlot) => (
+                            <Button
+                              key={timeSlot}
+                              variant={formData.birthTime === timeSlot ? "default" : "outline"}
+                              onClick={() => updateFormData("birthTime", timeSlot)}
+                              className={`h-12 text-sm ${
+                                formData.birthTime === timeSlot
+                                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+                              }`}
+                            >
+                              {timeSlot}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
-                      <p className="text-gray-600 text-sm">출생시간을 모르셔도<br/>기본 사주로 분석해드려요!</p>
-                    </div>
-                  )}
+                    )}
+
+                    {noBirthTime && (
+                      <div className="text-center py-6">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <span className="text-2xl">❓</span>
+                        </div>
+                        <p className="text-gray-600 text-sm">출생시간을 모르셔도<br/>기본 사주로 분석해드려요!</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -417,7 +438,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
               )}
 
               {step === 7 && (
-                <div className="transition-all duration-300 ease-in-out space-y-6">
+                <div className="transition-all duration-300 ease-in-out space-y-4 pb-4">
                   {/* 방문 예정 CC */}
                   <div>
                     <Label className="text-sm text-gray-500 mb-2 block">방문 예정인 CC가 있으신가요?</Label>
@@ -426,7 +447,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
                       onChange={(e) => updateFormData("countryClub", e.target.value)}
                       disabled={noCountryClub}
                       placeholder="골프장 이름을 입력해주세요"
-                      className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-0 py-4 text-lg focus:border-blue-600 focus:ring-0 placeholder:text-gray-400 disabled:opacity-50 w-full"
+                      className="border-0 border-b-2 border-gray-200 rounded-none bg-transparent px-0 py-3 text-base focus:border-blue-600 focus:ring-0 placeholder:text-gray-400 disabled:opacity-50 w-full"
                     />
                     <div className="flex items-center space-x-2 mt-2">
                       <Checkbox
@@ -448,14 +469,14 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
 
                   {/* 아이언 브랜드 */}
                   <div>
-                    <Label className="text-sm text-gray-500 mb-3 block">내 아이언 브랜드</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <Label className="text-sm text-gray-500 mb-2 block">내 아이언 브랜드</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
                       {golfBrands.map((brand) => (
                         <Button
                           key={`iron-${brand}`}
                           variant={formData.ironBrand === brand ? "default" : "outline"}
                           onClick={() => updateFormData("ironBrand", brand)}
-                          className={`h-10 text-sm ${
+                          className={`h-8 text-xs ${
                             formData.ironBrand === brand
                               ? "bg-black text-white hover:bg-gray-800"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
@@ -469,14 +490,14 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
 
                   {/* 드라이버 브랜드 */}
                   <div>
-                    <Label className="text-sm text-gray-500 mb-3 block">내 드라이버 브랜드</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <Label className="text-sm text-gray-500 mb-2 block">내 드라이버 브랜드</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
                       {golfBrands.map((brand) => (
                         <Button
                           key={`driver-${brand}`}
                           variant={formData.driverBrand === brand ? "default" : "outline"}
                           onClick={() => updateFormData("driverBrand", brand)}
-                          className={`h-10 text-sm ${
+                          className={`h-8 text-xs ${
                             formData.driverBrand === brand
                               ? "bg-black text-white hover:bg-gray-800"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
@@ -490,14 +511,14 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
 
                   {/* 퍼터 브랜드 */}
                   <div>
-                    <Label className="text-sm text-gray-500 mb-3 block">내 퍼터 브랜드</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <Label className="text-sm text-gray-500 mb-2 block">내 퍼터 브랜드</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
                       {golfBrands.map((brand) => (
                         <Button
                           key={`putter-${brand}`}
                           variant={formData.putterBrand === brand ? "default" : "outline"}
                           onClick={() => updateFormData("putterBrand", brand)}
-                          className={`h-10 text-sm ${
+                          className={`h-8 text-xs ${
                             formData.putterBrand === brand
                               ? "bg-black text-white hover:bg-gray-800"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
