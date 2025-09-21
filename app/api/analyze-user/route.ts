@@ -559,8 +559,10 @@ function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
   const element = analysis?.element || '木'
   const elementName = analysis?.element_name || '목의 기운'
   
-  // 골신 할아버지 스타일 기본 운세 생성
-  const golfGodFortune = `좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
+  // 골신 할아버지 스타일 기본 운세 생성 (다양한 템플릿)
+  const fortuneTemplates = [
+    // 템플릿 1: 성장형
+    `좋네… 자네 ${userInfo.name}의 운세를 보자고 했지?
 생년월일 보니, ${userInfo.birthDate}생… ${userInfo.gender}라구? 음, 기운이 뚜렷하네.
 
 :골프를_치는_${userInfo.gender === '남성' ? '남성' : '여성'}: 전반 기류
@@ -583,7 +585,64 @@ ${strengths[0]}이 강점이니 이를 활용하고, ${weaknesses[0]}을 보완�
 :골프: 종합
 올해 자네에게 내려온 메시지는 분명하다네. "${level} 레벨에서 꾸준한 성장을 하는 해" 특히 가을 무렵엔 운세가 강하게 들어오니, 그때 라운딩에서 좋은 성과를 낼 수 있을 게야.
 
-허허, 그러니 너무 조급해 말고… 올해는 ${strengths[0]}과 멘탈, 그리고 기본기만 믿고 가면, 자네 골프 인생에 큰 길이 열릴 걸세.`
+허허, 그러니 너무 조급해 말고… 올해는 ${strengths[0]}과 멘탈, 그리고 기본기만 믿고 가면, 자네 골프 인생에 큰 길이 열릴 걸세.`,
+
+    // 템플릿 2: 도전형
+    `음… 자네 ${userInfo.name}의 운세를 보자고 했구나.
+생년월일 보니, ${userInfo.birthDate}생… ${userInfo.gender}라구? 흥미로운 기운이네.
+
+:골프를_치는_${userInfo.gender === '남성' ? '남성' : '여성'}: 전반 기류
+올해 자네 골프 운세는 도전과 변화의 해라네. ${elementName}의 기운이 새로운 가능성을 열어줄 걸세.
+
+:대체로_맑음: 세부 운세
+
+멘탈 운
+올해는 특히 멘탈 관리가 중요하네. ${strengths[0]}에서 자신감을 찾되, ${weaknesses[0]}에 대한 두려움을 극복해야 할 때야.
+
+기술 운
+${strengths[0]}은 더욱 발전시켜야 하고, ${weaknesses[0]}은 새로운 접근법으로 극복해보게. 기존 방식에만 얽매이지 말고 말이야.
+
+체력 운
+몸의 균형을 맞추는 것이 중요하다네. 스트레칭과 코어 강화에 더 신경 써야 할 걸세.
+
+인맥 운
+새로운 골프 동반자를 만날 기회가 많을 해야. 서로 다른 스타일의 골퍼들과 라운딩해보게.
+
+:골프: 종합
+올해 자네에게 내려온 메시지는 "변화를 두려워하지 말라"는 것이네. ${level} 레벨에서 벗어나기 위해 새로운 도전을 해보게.
+
+허허, 안전한 길보다는 성장할 수 있는 길을 선택하라네… 올해는 ${strengths[0]}을 무기로 ${weaknesses[0]}을 정복하는 해가 될 걸세.`,
+
+    // 템플릿 3: 안정형
+    `좋아… 자네 ${userInfo.name}의 운세를 보자고 했지?
+생년월일 보니, ${userInfo.birthDate}생… ${userInfo.gender}라구? 차분한 기운이 느껴지네.
+
+:골프를_치는_${userInfo.gender === '남성' ? '남성' : '여성'}: 전반 기류
+올해 자네 골프 운세는 안정과 일관성의 해라네. ${elementName}의 기운으로 차근차근 실력을 쌓아갈 걸세.
+
+:대체로_맑음: 세부 운세
+
+멘탈 운
+골프는 마음의 평정이 중요하네. 올해 자네는 ${strengths[0]}에서 안정감을 찾고, ${weaknesses[0]}에 대해서는 서두르지 말고 천천히 개선해나가게.
+
+기술 운
+${strengths[0]}을 바탕으로 꾸준한 연습을 하면, ${weaknesses[0]}도 자연스럽게 향상될 거라네. 급하게 서두르지 말고 말이야.
+
+체력 운
+몸의 리듬을 유지하는 것이 중요하다네. 규칙적인 운동과 충분한 휴식의 균형을 맞추게.
+
+인맥 운
+기존의 골프 친구들과의 관계가 더욱 돈독해질 해야. 함께 성장하고 발전할 수 있는 동반자들과 시간을 보내게.
+
+:골프: 종합
+올해 자네에게 내려온 메시지는 "꾸준함이 최고의 무기"라는 것이네. ${level} 레벨에서 안정적으로 실력을 쌓아가면, 언젠가는 큰 성과를 거둘 수 있을 걸세.
+
+허허, 서두르지 말고… 올해는 ${strengths[0]}을 다지고, ${weaknesses[0]}을 보완하는 차분한 한 해로 만들어보게.`
+  ]
+  
+  // 랜덤하게 템플릿 선택
+  const selectedTemplate = fortuneTemplates[Math.floor(Math.random() * fortuneTemplates.length)]
+  const golfGodFortune = selectedTemplate
   
   return {
     title: golfGodFortune,

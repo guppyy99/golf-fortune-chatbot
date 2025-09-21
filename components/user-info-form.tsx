@@ -242,15 +242,15 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
           </p>
         </div>
 
-        <div className={`flex-1 px-6 py-8 flex flex-col ${step === 7 ? 'justify-start' : 'justify-center'} ${step === 7 ? 'overflow-y-auto' : ''}`}>
-          <div className="w-full">
-            <div className={`${step === 7 ? 'h-16 mb-4' : 'h-32 mb-8'}`}>
+        <div className={`flex-1 px-6 py-8 flex flex-col ${step === 7 ? 'justify-start' : 'justify-center'}`}>
+          <div className={`w-full ${step === 7 ? 'h-full overflow-y-auto' : ''}`}>
+            <div className={`${step === 7 ? 'h-16 mb-4 flex-shrink-0' : 'h-32 mb-8'}`}>
               <h2 className="text-2xl font-bold text-gray-900 leading-tight whitespace-pre-line">
                 {stepContent.title}
               </h2>
             </div>
 
-            <div className={`${step === 7 ? 'min-h-0' : 'h-40'}`}>
+            <div className={`${step === 7 ? 'flex-1 min-h-0' : 'h-40'}`}>
               {step === 1 && (
                 <div className="transition-all duration-300 ease-in-out">
                   <Label className="text-sm text-gray-500 mb-2 block">{stepContent.subtitle}</Label>
@@ -438,7 +438,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
               )}
 
               {step === 7 && (
-                <div className="transition-all duration-300 ease-in-out space-y-4 pb-4">
+                <div className="transition-all duration-300 ease-in-out space-y-4 pb-4 h-full overflow-y-auto">
                   {/* 방문 예정 CC */}
                   <div>
                     <Label className="text-sm text-gray-500 mb-2 block">방문 예정인 CC가 있으신가요?</Label>
