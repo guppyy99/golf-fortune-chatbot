@@ -242,15 +242,25 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
           </p>
         </div>
 
-        <div className={`flex-1 px-6 py-8 flex flex-col ${step === 7 ? 'justify-start' : 'justify-center'}`}>
-          <div className={`w-full ${step === 7 ? 'h-full overflow-y-auto' : ''}`}>
-            <div className={`${step === 7 ? 'h-16 mb-4 flex-shrink-0' : 'h-32 mb-8'}`}>
+        {step === 7 ? (
+          // Step 7: 스크롤 가능한 레이아웃
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="px-6 py-4 flex-shrink-0">
               <h2 className="text-2xl font-bold text-gray-900 leading-tight whitespace-pre-line">
                 {stepContent.title}
               </h2>
             </div>
-
-            <div className={`${step === 7 ? 'flex-1 min-h-0' : 'h-40'}`}>
+            <div className="flex-1 overflow-y-auto px-6 pb-6">
+        ) : (
+          // 다른 스텝: 중앙 정렬 레이아웃
+          <div className="flex-1 px-6 py-8 flex flex-col justify-center">
+            <div className="h-32 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 leading-tight whitespace-pre-line">
+                {stepContent.title}
+              </h2>
+            </div>
+            <div className="h-40">
+        )}
               {step === 1 && (
                 <div className="transition-all duration-300 ease-in-out">
                   <Label className="text-sm text-gray-500 mb-2 block">{stepContent.subtitle}</Label>
@@ -378,26 +388,28 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
                     {!noBirthTime && (
                       <div className="space-y-3">
                         <Label className="text-sm text-gray-500">출생시간을 선택해주세요</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            "새벽 (00:00-06:00)",
-                            "아침 (06:00-12:00)", 
-                            "오후 (12:00-18:00)",
-                            "저녁 (18:00-24:00)"
-                          ].map((timeSlot) => (
-                            <Button
-                              key={timeSlot}
-                              variant={formData.birthTime === timeSlot ? "default" : "outline"}
-                              onClick={() => updateFormData("birthTime", timeSlot)}
-                              className={`h-12 text-sm ${
-                                formData.birthTime === timeSlot
-                                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
-                              }`}
-                            >
-                              {timeSlot}
-                            </Button>
-                          ))}
+                        <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                          <div className="grid grid-cols-6 gap-1">
+                            {Array.from({ length: 144 }, (_, i) => {
+                              const hour = Math.floor(i / 6)
+                              const minute = (i % 6) * 10
+                              const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+                              return (
+                                <Button
+                                  key={timeString}
+                                  variant={formData.birthTime === timeString ? "default" : "outline"}
+                                  onClick={() => updateFormData("birthTime", timeString)}
+                                  className={`h-8 text-xs ${
+                                    formData.birthTime === timeString
+                                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+                                  }`}
+                                >
+                                  {timeString}
+                                </Button>
+                              )
+                            })}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -438,7 +450,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
               )}
 
               {step === 7 && (
-                <div className="transition-all duration-300 ease-in-out space-y-4 pb-4 h-full overflow-y-auto">
+                <div className="transition-all duration-300 ease-in-out space-y-4">
                   {/* 방문 예정 CC */}
                   <div>
                     <Label className="text-sm text-gray-500 mb-2 block">방문 예정인 CC가 있으신가요?</Label>
@@ -617,7 +629,7 @@ export function UserInfoForm({ onComplete }: UserInfoFormProps) {
             </div>
           </div>
         </div>
-      )}
+        )}
 
       {showTermsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
