@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 interface IntroPageProps {
   onStart: () => void
 }
@@ -8,10 +10,12 @@ export function IntroPage({ onStart }: IntroPageProps) {
   return (
     <div className="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
       <div className="w-full aspect-[4/5] relative overflow-hidden">
-        <img 
+        <Image 
           src="/main-image.jpg" 
           alt="골프 운세 캠페인 메인 이미지"
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          priority
         />
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
       </div>
