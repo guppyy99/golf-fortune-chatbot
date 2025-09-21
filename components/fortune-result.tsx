@@ -8,68 +8,41 @@ import type { UserInfo, FortuneAnalysis } from "./golf-fortune-app"
 function parseFortuneSections(fortuneText: string) {
   if (!fortuneText) return null
 
+  // 더 정확한 파싱을 위한 정규식 패턴
+  const patterns = {
+    overall: /:골프를_치는_[^:]+:\s*전반 기류\s*\n([^:]+?)(?=:대체로_맑음:|$)/s,
+    mental: /멘탈 운\s*\n([^기술 운]+?)(?=기술 운|$)/s,
+    skill: /기술 운\s*\n([^체력 운]+?)(?=체력 운|$)/s,
+    physical: /체력 운\s*\n([^인맥 운]+?)(?=인맥 운|$)/s,
+    network: /인맥 운\s*\n([^:골프:]+?)(?=:골프:|$)/s,
+    summary: /:골프:\s*종합\s*\n([^허허]+?)(?=허허|$)/s,
+    final: /허허[^]*$/s
+  }
+
   const sections = []
-  const lines = fortuneText.split('\n')
-  
-  let currentSection = null
-  let currentContent = []
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim()
-    
-    // 섹션 헤더 감지
-    if (trimmedLine.includes('전반 기류') || trimmedLine.includes('세부 운세') || 
-        trimmedLine.includes('멘탈 운') || trimmedLine.includes('기술 운') || 
-        trimmedLine.includes('체력 운') || trimmedLine.includes('인맥 운') || 
-        trimmedLine.includes('종합') || trimmedLine.includes('허허')) {
-      
-      // 이전 섹션 저장
-      if (currentSection && currentContent.length > 0) {
-        sections.push({
-          type: currentSection,
-          content: currentContent.join('\n').trim()
-        })
-      }
-      
-      // 새 섹션 시작
-      if (trimmedLine.includes('전반 기류')) {
-        currentSection = 'overall'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('세부 운세')) {
-        currentSection = 'details'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('멘탈 운')) {
-        currentSection = 'mental'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('기술 운')) {
-        currentSection = 'skill'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('체력 운')) {
-        currentSection = 'physical'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('인맥 운')) {
-        currentSection = 'network'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('종합')) {
-        currentSection = 'summary'
-        currentContent = [trimmedLine]
-      } else if (trimmedLine.includes('허허')) {
-        currentSection = 'final'
-        currentContent = [trimmedLine]
-      }
-    } else if (trimmedLine && currentSection) {
-      currentContent.push(trimmedLine)
+
+  // 각 섹션 추출
+  Object.entries(patterns).forEach(([type, pattern]) => {
+    const match = fortuneText.match(pattern)
+    if (match && match[1]) {
+      sections.push({
+        type,
+        content: match[1].trim()
+      })
     }
+  })
+
+  // 섹션이 없으면 전체 텍스트를 그대로 표시
+  if (sections.length === 0) {
+    return (
+      <div className="p-6 rounded-xl border bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200">
+        <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {fortuneText}
+        </div>
+      </div>
+    )
   }
-  
-  // 마지막 섹션 저장
-  if (currentSection && currentContent.length > 0) {
-    sections.push({
-      type: currentSection,
-      content: currentContent.join('\n').trim()
-    })
-  }
-  
+
   return sections.map((section, index) => {
     const sectionConfig = getSectionConfig(section.type)
     return (
@@ -82,7 +55,7 @@ function parseFortuneSections(fortuneText: string) {
             {sectionConfig.title}
           </h3>
         </div>
-        <div className={`text-sm leading-relaxed ${sectionConfig.textColor}`}>
+        <div className={`text-sm leading-relaxed ${sectionConfig.textColor} whitespace-pre-wrap`}>
           {section.content}
         </div>
       </div>
