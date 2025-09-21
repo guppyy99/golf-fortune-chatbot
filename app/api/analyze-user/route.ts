@@ -351,8 +351,8 @@ function parseFortuneResponse(response: string, userInfo: UserInfo, analysis: an
     console.log('종합:', summaryMatch ? '매칭됨' : '매칭 안됨')
     console.log('마무리:', finalMatch ? '매칭됨' : '매칭 안됨')
     
-    // 동적 행운 아이템 생성
-    const luckyClub = analysis?.lucky_club || getLuckyClubFromStrengths(analysis?.strengths)
+    // 동적 행운 아이템 생성 (핸디캡 정보 포함)
+    const luckyClub = analysis?.lucky_club || getLuckyClubFromStrengths(analysis?.strengths, userInfo.handicap)
     const luckyBall = analysis?.lucky_ball || getLuckyBallFromColors(analysis?.lucky_elements)
     const luckyTPO = analysis?.lucky_tpo || getLuckyTPOFromColors(analysis?.lucky_elements)
     const luckyHole = getLuckyHoleFromNumbers(analysis?.lucky_numbers)
@@ -378,14 +378,71 @@ function parseFortuneResponse(response: string, userInfo: UserInfo, analysis: an
   }
 }
 
-// 동적 행운 아이템 생성 함수들
-function getLuckyClubFromStrengths(strengths: string[]) {
-  if (!Array.isArray(strengths)) return '아이언'
-  if (strengths.includes('드라이버')) return '드라이버'
-  if (strengths.includes('아이언')) return '아이언'
-  if (strengths.includes('퍼팅')) return '퍼터'
-  if (strengths.includes('웨지')) return '웨지'
-  return '아이언'
+// 골프 클럽 추천 테이블 데이터
+const CLUB_RECOMMENDATIONS = [
+  { brand: 'Srixon', category: '드라이버', model: 'ZXi', year: 2025, level: '중급자~고급자', features: '낮은 스핀, 조정 가능한 무게 포함됨' },
+  { brand: 'Srixon', category: '드라이버', model: 'ZXi Max', year: 2025, level: '초급자~중급자', features: '관용성 큼' },
+  { brand: 'Srixon', category: '드라이버', model: 'ZXi LS', year: 2025, level: '고급자', features: '스핀 제어 쪽 강함' },
+  { brand: 'Srixon', category: '드라이버', model: 'ZX5 Mk II', year: 2023, level: '중급자', features: '거리+관용성 균형' },
+  { brand: 'Srixon', category: '드라이버', model: 'ZX7 Mk II', year: 2023, level: '고급자', features: '작업 가능성 있음' },
+  { brand: 'Srixon', category: '아이언', model: 'ZXi4', year: 2025, level: '초급자~중급자', features: '치기 쉬운 설계' },
+  { brand: 'Srixon', category: '아이언', model: 'ZXi5', year: 2025, level: '중급자', features: '느낌+관용성 균형' },
+  { brand: 'Srixon', category: '아이언', model: 'ZXi7', year: 2025, level: '고급자', features: '컴팩트, 정확도 높음' },
+  { brand: 'Srixon', category: '아이언', model: 'ZX4 Mk II', year: 2025, level: '초급자', features: '최고 관용성' },
+  { brand: 'XXIO', category: '드라이버', model: 'XXIO 13 Driver', year: 2024, level: '초급자~중급자', features: '가벼움 + 높은 런치' },
+  { brand: 'XXIO', category: '아이언', model: 'XXIO 13 Irons', year: 2024, level: '초급자~중급자', features: '쉬운 런치, 미스샷 보완' },
+  { brand: 'XXIO', category: '우드/하이브리드', model: 'XXIO 13 Fairway / Hybrid', year: 2024, level: '초급자~중급자', features: '비행 안정성' },
+  { brand: 'Cleveland', category: '웨지', model: 'RTZ Tour Satin Wedge', year: 2025, level: '중급자~고급자', features: 'Z-Alloy, 다양한 그라인드' },
+  { brand: 'Cleveland', category: '웨지', model: 'RTZ Tour Rack Full-Face Wedge', year: 2025, level: '고급자', features: '풀 페이스, 정밀 스핀' },
+  { brand: 'Cleveland', category: '아이언', model: 'ZipCore XL Irons', year: 2024, level: '초급자~중급자', features: '관용성 + 쉬운 런치' }
+]
+
+// 핸디캡에 따른 레벨 분류
+function getHandicapLevel(handicap: number): string {
+  if (handicap < 10) return '고급자'
+  if (handicap < 20) return '중급자'
+  return '초급자'
+}
+
+// 카테고리에 따른 클럽 추천
+function getLuckyClubFromStrengths(strengths: string[], handicap: number) {
+  const level = getHandicapLevel(handicap)
+  
+  // 강점에 따른 카테고리 매핑
+  let targetCategory = '아이언' // 기본값
+  
+  if (Array.isArray(strengths)) {
+    if (strengths.includes('드라이버')) targetCategory = '드라이버'
+    else if (strengths.includes('아이언')) targetCategory = '아이언'
+    else if (strengths.includes('퍼팅')) targetCategory = '퍼터'
+    else if (strengths.includes('웨지')) targetCategory = '웨지'
+  }
+  
+  // 해당 카테고리와 레벨에 맞는 클럽 찾기
+  const suitableClubs = CLUB_RECOMMENDATIONS.filter(club => {
+    if (club.category !== targetCategory) return false
+    
+    // 레벨 매칭 로직
+    if (level === '초급자') {
+      return club.level.includes('초급자')
+    } else if (level === '중급자') {
+      return club.level.includes('중급자')
+    } else if (level === '고급자') {
+      return club.level.includes('고급자')
+    }
+    return false
+  })
+  
+  // 적합한 클럽이 있으면 랜덤 선택, 없으면 기본값
+  if (suitableClubs.length > 0) {
+    const selectedClub = suitableClubs[Math.floor(Math.random() * suitableClubs.length)]
+    return `${selectedClub.brand} ${selectedClub.model}`
+  }
+  
+  // 기본값 반환
+  return level === '초급자' ? 'XXIO 13 Irons' : 
+         level === '중급자' ? 'Srixon ZXi5' : 
+         'Srixon ZXi7'
 }
 
 function getLuckyBallFromColors(colors: string[]) {
@@ -450,13 +507,9 @@ function generateDefaultFortune(userInfo: UserInfo | null, analysis: any) {
     }
   }
 
-  // 개인화된 운세 생성
+  // 개인화된 운세 생성 (실제 클럽 모델명 사용)
   const getLuckyClub = () => {
-    if (analysis?.strengths?.includes('드라이버')) return '드라이버'
-    if (analysis?.strengths?.includes('아이언')) return '아이언'
-    if (analysis?.strengths?.includes('퍼팅')) return '퍼터'
-    if (analysis?.strengths?.includes('웨지')) return '웨지'
-    return '아이언'
+    return getLuckyClubFromStrengths(analysis?.strengths, userInfo.handicap)
   }
   
   const getLuckyBall = () => {

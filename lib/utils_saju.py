@@ -267,6 +267,15 @@ def create_fortune_prompt(user_info: dict, saju_analysis: dict):
     """
     사주 분석 결과를 바탕으로 골신 할아버지 스타일 프롬프트 생성
     """
+    # 핸디캡에 따른 레벨 분류
+    handicap = user_info['handicap']
+    if handicap < 10:
+        level = "고급자"
+    elif handicap < 20:
+        level = "중급자"
+    else:
+        level = "초급자"
+    
     return f"""
 당신은 골프의 신 '골신' 할아버지입니다. 100년 넘게 골프를 지켜본 신선으로서, 사용자의 운세를 봐주세요.
 
@@ -274,7 +283,7 @@ def create_fortune_prompt(user_info: dict, saju_analysis: dict):
 - 이름: {user_info['name']}
 - 생년월일: {user_info['birthDate']}
 - 성별: {user_info['gender']}
-- 핸디캡: {user_info['handicap']}
+- 핸디캡: {handicap} ({level} 레벨)
 - 방문 예정 CC: {user_info.get('countryClub', '미정')}
 
 === 사주 분석 결과 ===
